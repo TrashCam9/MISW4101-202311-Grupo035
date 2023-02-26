@@ -73,7 +73,7 @@ class FachadaCajaDeSeguridad:
         Rertorna:
             (string): La clave maestra de la caja de seguridad
         '''
-        raise NotImplementedError("Método no implementado")
+        return self.session.query(CajaDeSeguridad).first().clave_maestra
 
     def crear_login(self, nombre, email, usuario, password, url, notas):
         ''' Crea un elemento login
