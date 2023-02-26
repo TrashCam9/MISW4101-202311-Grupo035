@@ -1,12 +1,13 @@
 from src.modelo.clave import Clave
 from src.modelo.elemento import Elemento, ElementoConClave, Identificacion, Login, Secreto, Tarjeta
 from src.modelo.declarative_base import Session, engine, Base
+from src.logica.FachadaCajaDeSeguridad import FachadaCajaDeSeguridad
 
 from datetime import date
 
 
 if __name__ == '__main__':
-    Base.metadata.create_all(engine)
+    FachadaCajaDeSeguridad()
 
     session = Session()
     print("SESIÓN INICIADA")

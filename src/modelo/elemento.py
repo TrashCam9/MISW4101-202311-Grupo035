@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Date, ForeignKey
+from sqlalchemy.orm import relationship
 from .declarative_base import Base
 
 
@@ -9,7 +10,6 @@ class Elemento(Base):
     tipo = Column(String)
     nombre = Column(String)
     nota = Column(String)
-
 
 class ElementoConClave(Elemento):
 

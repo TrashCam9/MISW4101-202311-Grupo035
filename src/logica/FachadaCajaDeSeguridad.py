@@ -1,7 +1,24 @@
 '''
 Esta clase es la fachada con los métodos a implementar en la lógica
 '''
+from src.modelo.elemento import Elemento
+from src.modelo.clave import Clave
+from src.modelo.caja_de_seguridad import CajaDeSeguridad
+from src.modelo.declarative_base import engine, Base, Session
+
 class FachadaCajaDeSeguridad:
+
+    def __init__(self):
+        Base.metadata.create_all(engine)
+        self.session = Session()
+
+        # Creamos la caja de seguridad si no existe
+        caja = self.session.query(CajaDeSeguridad).first()
+        if caja is None:
+            caja = CajaDeSeguridad()
+            self.session.add(caja)
+            self.session.commit()
+            
 
     def dar_elementos(self):
         ''' Retorna la lista de elementos de la caja de seguridad
