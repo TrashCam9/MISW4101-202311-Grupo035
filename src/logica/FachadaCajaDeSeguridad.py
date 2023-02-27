@@ -25,7 +25,8 @@ class FachadaCajaDeSeguridad:
         Retorna:
             (list): La lista con los dict o los objetos de los elementos
         '''
-        raise NotImplementedError("Método no implementado")
+        elementos = self.session.query(Elemento).all()
+        return elementos
 
     def dar_elemento(self, id_elemento):
         ''' Retorna un elemento de la caja de seguridad
