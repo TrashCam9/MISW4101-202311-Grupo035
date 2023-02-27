@@ -7,6 +7,7 @@ class Clave(Base):
 
     __tablename__ = 'claves'
     id = Column(Integer, primary_key=True)
+    nombre = Column(String)
     clave = Column(String)
     pista = Column(String)
     elementos = relationship(
