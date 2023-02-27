@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 from .declarative_base import Base
 
@@ -12,3 +12,6 @@ class Clave(Base):
     pista = Column(String)
     elementos = relationship(
         'ElementoConClave', cascade='all, delete, delete-orphan')
+
+    def __getitem__(self, key):
+        return getattr(self, key)

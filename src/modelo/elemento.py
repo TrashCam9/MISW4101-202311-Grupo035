@@ -11,6 +11,9 @@ class Elemento(Base):
     nombre = Column(String)
     nota = Column(String)
 
+    def __getitem__(self, key):
+        return getattr(self, key)
+
 class ElementoConClave(Elemento):
 
     __tablename__ = 'elementos_con_clave'
