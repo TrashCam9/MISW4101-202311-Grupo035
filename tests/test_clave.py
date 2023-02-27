@@ -26,3 +26,11 @@ class ClaveTestCase(unittest.TestCase):
         self.assertTrue(not clave.isalpha())
         self.assertTrue(not clave.islower())
         self.assertTrue(not clave.isalnum())
+
+    def test_ver_claves_favoritas(self):
+        claves = self.fachada.dar_claves_favoritas()
+        self.assertIsNotNone(claves)
+        self.assertIsInstance(claves, list)
+
+    def tearDown(self):
+        self.session.close()

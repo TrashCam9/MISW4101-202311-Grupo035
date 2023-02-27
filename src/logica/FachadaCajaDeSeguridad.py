@@ -45,7 +45,8 @@ class FachadaCajaDeSeguridad:
         Retorna:
             (list): La lista con los dict o los objetos de las claves favoritas
         '''
-        raise NotImplementedError("Método no implementado")
+        claves = self.session.query(Clave).all()
+        return claves
 
     def dar_clave_favorita(self, id_clave):
         ''' Retorna una clave favoritas
