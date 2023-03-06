@@ -250,7 +250,7 @@ class FachadaCajaDeSeguridad:
             pista (string): La pista para recordar la clave favorita
         '''
         if error_message := self.validar_crear_editar_clave(nombre, clave, pista):
-            raise ValueError(error_message)
+            raise TypeError(error_message)
 
         clave = Clave(nombre=nombre, clave=clave, pista=pista)
         self.session.add(clave)
@@ -267,23 +267,29 @@ class FachadaCajaDeSeguridad:
             validación o una cadena de caracteres vacía si no hay errores.
         '''
 
-        # Validar que los parámetros no sean nulos
-        if not nombre or not clave or not pista:
-            return "Todos los campos son obligatorios"
-        
-        # Validar que los parámetros sean de tipo string
         if not(isinstance(nombre, str) and isinstance(clave, str) and isinstance(pista, str)):
             return "Todos los campos deben ser de tipo string"
         return ""
 
-    def editar_clave(self, id, nombre, clave, pista):
+    def editar_clave(self, nombre, clave, pista):
         ''' Edita una clave favorita
         Parámetros:
             nombre (string): El nombre de la clave favorita
-            clave (string): El password o clae de la clave favorita
+            clave (string): El password o clave de la clave favorita
             pista (string): La pista para recordar la clave favorita
         '''
-        raise NotImplementedError("Método no implementado")
+        if not isinstance(clave, str) or not isinstance(pista, str) or not isinstance(nombre, str):
+            raise TypeError("Todos los campos deben ser de tipo string")
+        if (len(nombre) < 3 or len(pista) <3 or len(clave) == 0):
+            raise ValueError("El nombre de la clave favorita y la pista deben tener al menos 3 caracteres. Y la longitud de la clave debe ser mayor a 0")
+        if (len(self.session.query(Clave).filter(Clave.nombre == nombre).all())==0):
+            raise ValueError("La clave favorita referenciada no existe.")
+        else: 
+            clave_busqueda = self.session.query(Clave).filter(Clave.nombre == nombre).first()
+            clave_busqueda.clave = clave
+            clave_busqueda.pista = pista
+            self.session.commit()
+        
 
     def generar_clave(self):
         ''' Genera una clave para una clave favorita
