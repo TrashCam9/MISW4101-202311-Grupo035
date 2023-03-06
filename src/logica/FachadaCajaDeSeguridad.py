@@ -4,7 +4,7 @@ Esta clase es la fachada con los métodos a implementar en la lógica
 from src.modelo.elemento import Elemento
 from src.modelo.clave import Clave
 from src.modelo.caja_de_seguridad import CajaDeSeguridad
-from src.modelo.declarative_base import engine, Base, Session
+from src.modelo.declarative_base import engine, Base, session
 
 import string
 import random
@@ -13,14 +13,13 @@ class FachadaCajaDeSeguridad:
 
     def __init__(self):
         Base.metadata.create_all(engine)
-        self.session = Session()
 
         # Creamos la caja de seguridad si no existe
-        caja = self.session.query(CajaDeSeguridad).first()
+        caja = session.query(CajaDeSeguridad).first()
         if caja is None:
             caja = CajaDeSeguridad()
-            self.session.add(caja)
-            self.session.commit()
+            session.add(caja)
+            session.commit()
             
 
     def dar_elementos(self):
@@ -28,7 +27,7 @@ class FachadaCajaDeSeguridad:
         Retorna:
             (list): La lista con los dict o los objetos de los elementos
         '''
-        elementos = self.session.query(Elemento).all()
+        elementos = session.query(Elemento).all()
         return elementos
 
     def dar_elemento(self, id_elemento):
@@ -45,7 +44,7 @@ class FachadaCajaDeSeguridad:
         Retorna:
             (list): La lista con los dict o los objetos de las claves favoritas
         '''
-        claves = self.session.query(Clave).all()
+        claves = session.query(Clave).all()
         return claves
 
     def dar_clave_favorita(self, id_clave):
@@ -78,7 +77,7 @@ class FachadaCajaDeSeguridad:
         Rertorna:
             (string): La clave maestra de la caja de seguridad
         '''
-        return self.session.query(CajaDeSeguridad).first().clave_maestra
+        return session.query(CajaDeSeguridad).first().clave_maestra
 
     def crear_login(self, nombre, email, usuario, password, url, notas):
         ''' Crea un elemento login
@@ -253,8 +252,8 @@ class FachadaCajaDeSeguridad:
             raise TypeError(error_message)
 
         clave = Clave(nombre=nombre, clave=clave, pista=pista)
-        self.session.add(clave)
-        self.session.commit()
+        session.add(clave)
+        session.commit()
 
     def validar_crear_editar_clave(self, nombre, clave, pista):
         ''' Valida que se pueda crear o editar una clave favorita
@@ -282,13 +281,13 @@ class FachadaCajaDeSeguridad:
             raise TypeError("Todos los campos deben ser de tipo string")
         if (len(nombre) < 3 or len(pista) <3 or len(clave) == 0):
             raise ValueError("El nombre de la clave favorita y la pista deben tener al menos 3 caracteres. Y la longitud de la clave debe ser mayor a 0")
-        if (len(self.session.query(Clave).filter(Clave.nombre == nombre).all())==0):
+        if (len(session.query(Clave).filter(Clave.nombre == nombre).all())==0):
             raise ValueError("La clave favorita referenciada no existe.")
         else: 
-            clave_busqueda = self.session.query(Clave).filter(Clave.nombre == nombre).first()
+            clave_busqueda = session.query(Clave).filter(Clave.nombre == nombre).first()
             clave_busqueda.clave = clave
             clave_busqueda.pista = pista
-            self.session.commit()
+            session.commit()
         
 
     def generar_clave(self):

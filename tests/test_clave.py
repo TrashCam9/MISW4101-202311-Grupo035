@@ -4,7 +4,7 @@ from faker import Faker
 
 from src.logica.FachadaCajaDeSeguridad import FachadaCajaDeSeguridad
 from src.modelo.clave import Clave
-from src.modelo.declarative_base import Session
+from src.modelo.declarative_base import session
 
 
 class ClaveTestCase(unittest.TestCase):
@@ -12,22 +12,21 @@ class ClaveTestCase(unittest.TestCase):
 
     def setUp(self) -> None:
         self.fachada = FachadaCajaDeSeguridad()
-        self.session = Session()
         self.data_factory = Faker()
         self.database_seeded = False
 
         # Crear 5 claves para las pruebas si no hay ninguna en la base de datos
-        if self.session.query(Clave).count() == 0:
+        if session.query(Clave).count() == 0:
             for _ in range(5):
                 clave = Clave(
                     nombre=self.data_factory.word(),
                     clave=self.data_factory.password(),
                     pista=self.data_factory.sentence(),
                 )
-                self.session.add(clave)
-            self.session.commit()
+                session.add(clave)
+            session.commit()
             self.database_seeded = True
-        self.clavesList = self.session.query(Clave).all()
+        self.clavesList = session.query(Clave).all()
 
     def test_crear_clave_errada(self):
         self.assertRaises(TypeError, self.fachada.crear_clave, 123, 123, 123)
@@ -39,7 +38,7 @@ class ClaveTestCase(unittest.TestCase):
             clave=self.data_factory.password(),
             pista=self.data_factory.sentence())
 
-        clave = self.session.query(Clave).filter(
+        clave = session.query(Clave).filter(
             Clave.nombre == nombre_clave).first()
         self.assertNotEqual(clave, None)
 
@@ -98,7 +97,7 @@ class ClaveTestCase(unittest.TestCase):
             clave="12345678",
             pista="Mi pista favorita")
 
-        claveGuardada = self.session.query(
+        claveGuardada = session.query(
             Clave).filter(Clave.nombre == clave.nombre).first()
         self.assertEqual(claveGuardada.clave, "12345678")
         self.assertEqual(claveGuardada.pista, "Mi pista favorita")
@@ -108,6 +107,6 @@ class ClaveTestCase(unittest.TestCase):
         # Eliminar las claves creadas en el setUp
         if self.database_seeded:
             for clave in self.clavesList:
-                self.session.delete(clave)
-            self.session.commit()
-        self.session.close()
+                session.delete(clave)
+            session.commit()
+        session.close()
