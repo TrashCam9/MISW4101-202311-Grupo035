@@ -78,10 +78,10 @@ class ClaveTestCase(unittest.TestCase):
 
     def test_editar_clave_nombre_repetido(self):
         clave = self.clavesList[0]
-        self.assertRaises(TypeError,
+        self.assertRaises(ValueError,
                           self.fachada.editar_clave,
                               id = clave.id,
-                              nombre=self.clavesList[1],
+                              nombre=self.clavesList[1].nombre,
                               clave="12345678",
                               pista="Mi pista favorita"
                           )
@@ -100,7 +100,7 @@ class ClaveTestCase(unittest.TestCase):
         clave = self.clavesList[0]
         self.fachada.editar_clave(
             id = clave.id,
-            nombre=clave.nombre,
+            nombre="nuevo nombre",
             clave="12345678",
             pista="Mi pista favorita")
 
