@@ -6,7 +6,8 @@ from .declarative_base import Base
 class Clave(Base):
 
     __tablename__ = 'claves'
-    nombre = Column(String, primary_key=True)
+    id = Column(Integer, primary_key=True)
+    nombre = Column(String, unique=True)
     clave = Column(String)
     pista = Column(String)
     elementos = relationship(
