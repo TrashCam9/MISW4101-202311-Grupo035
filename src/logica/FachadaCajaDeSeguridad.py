@@ -270,9 +270,10 @@ class FachadaCajaDeSeguridad:
             return "Todos los campos deben ser de tipo string"
         return ""
 
-    def editar_clave(self, nombre, clave, pista):
+    def editar_clave(self, id, nombre, clave, pista):
         ''' Edita una clave favorita
         Parámetros:
+            id (int): El id de la clave favorita
             nombre (string): El nombre de la clave favorita
             clave (string): El password o clave de la clave favorita
             pista (string): La pista para recordar la clave favorita
@@ -281,10 +282,10 @@ class FachadaCajaDeSeguridad:
             raise TypeError("Todos los campos deben ser de tipo string")
         if (len(nombre) < 3 or len(pista) <3 or len(clave) == 0):
             raise ValueError("El nombre de la clave favorita y la pista deben tener al menos 3 caracteres. Y la longitud de la clave debe ser mayor a 0")
-        if (len(session.query(Clave).filter(Clave.nombre == nombre).all())==0):
+        if (len(session.query(Clave).filter(Clave.id == id).all())==0):
             raise ValueError("La clave favorita referenciada no existe.")
         else: 
-            clave_busqueda = session.query(Clave).filter(Clave.nombre == nombre).first()
+            clave_busqueda = session.query(Clave).filter(Clave.id == id).first()
             clave_busqueda.clave = clave
             clave_busqueda.pista = pista
             session.commit()
