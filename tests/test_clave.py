@@ -41,6 +41,7 @@ class ClaveTestCase(unittest.TestCase):
         clave = session.query(Clave).filter(
             Clave.nombre == nombre_clave).first()
         self.assertNotEqual(clave, None)
+        self.clavesList.append(clave)
 
     def test_generar_clave(self):
         clave = self.fachada.generar_clave()
@@ -59,6 +60,7 @@ class ClaveTestCase(unittest.TestCase):
     def test_editar_clave_que_no_existe(self):
         self.assertRaises(ValueError,
                           self.fachada.editar_clave,
+                              id = 0,
                               nombre="Mi Clave Favorita Que Claramento No Existe",
                               clave="12345678",
                               pista="Mi pista favorita"
@@ -68,15 +70,18 @@ class ClaveTestCase(unittest.TestCase):
         clave = self.clavesList[0]
         self.assertRaises(TypeError,
                           self.fachada.editar_clave,
-                              nombre=clave.nombre,
+                              id = clave.id,
+                              nombre=123,
                               clave=123,
                               pista=123
                           )
 
-    def test_editar_clave_nombre_incorrecto(self):
-        self.assertRaises(TypeError,
+    def test_editar_clave_nombre_repetido(self):
+        clave = self.clavesList[0]
+        self.assertRaises(ValueError,
                           self.fachada.editar_clave,
-                              nombre=15,
+                              id = clave.id,
+                              nombre=self.clavesList[1].nombre,
                               clave="12345678",
                               pista="Mi pista favorita"
                           )
@@ -85,7 +90,8 @@ class ClaveTestCase(unittest.TestCase):
         clave = self.clavesList[0]
         self.assertRaises(ValueError,
                           self.fachada.editar_clave,
-                              nombre=clave.nombre,
+                              id = clave.id,
+                              nombre="",
                               clave="",
                               pista=""
                           )
@@ -93,12 +99,13 @@ class ClaveTestCase(unittest.TestCase):
     def test_editar_todos_los_campos_de_la_clave(self):
         clave = self.clavesList[0]
         self.fachada.editar_clave(
-            nombre=clave.nombre,
+            id = clave.id,
+            nombre="nuevo nombre",
             clave="12345678",
             pista="Mi pista favorita")
 
         claveGuardada = session.query(
-            Clave).filter(Clave.nombre == clave.nombre).first()
+            Clave).filter(Clave.id == clave.id).first()
         self.assertEqual(claveGuardada.clave, "12345678")
         self.assertEqual(claveGuardada.pista, "Mi pista favorita")
 
@@ -108,5 +115,6 @@ class ClaveTestCase(unittest.TestCase):
         if self.database_seeded:
             for clave in self.clavesList:
                 session.delete(clave)
+            self.database_seeded = False
             session.commit()
         session.close()
