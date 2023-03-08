@@ -280,6 +280,8 @@ class FachadaCajaDeSeguridad:
         '''
         if not isinstance(clave, str) or not isinstance(pista, str) or not isinstance(nombre, str):
             raise TypeError("Todos los campos deben ser de tipo string")
+        if (len(session.query(Clave).filter(Clave.nombre == nombre).all())>0):
+            raise ValueError("Ya existe una clave favorita con ese nombre.")
         if (len(nombre) < 3 or len(pista) <3 or len(clave) == 0):
             raise ValueError("El nombre de la clave favorita y la pista deben tener al menos 3 caracteres. Y la longitud de la clave debe ser mayor a 0")
         if (len(session.query(Clave).filter(Clave.id == id).all())==0):
