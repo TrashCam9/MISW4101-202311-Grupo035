@@ -2,7 +2,7 @@ import unittest
 
 from src.modelo.declarative_base import session
 
-from src.modelo.elemento import Login, Identificacion, Tarjeta
+from src.modelo.elemento import Login, Identificacion, Secreto, Tarjeta
 from src.modelo.clave import Clave
 
 from src.logica.FachadaCajaDeSeguridad import FachadaCajaDeSeguridad
@@ -13,12 +13,13 @@ class ReporteDeSeguridadTestCase(unittest.TestCase):
     listaLogins: "list[Clave]" = []
     listaIds: "list[Identificacion]" = []
     listaTarjetas: "list[Tarjeta]" = []
+    listaSecretos: "list[Secreto]" = []
+    clave: "Clave"
 
     def setUp(self) -> None:
         self.fachada = FachadaCajaDeSeguridad()    
         self.session = session   
         self.data_factory = testing_utils.data_factory
-        self.clave: Clave
 
         if session.query(Clave).count == 0:
             self.clave = testing_utils.crear_clave()
@@ -36,6 +37,10 @@ class ReporteDeSeguridadTestCase(unittest.TestCase):
         if session.query(Tarjeta).count() == 0:
             testing_utils.crear_5_tarjetas_aleatorias(self.clave)
         self.listaTarjetas = session.query(Tarjeta).all()
+
+        if session.query(Secreto).count() == 0:
+            testing_utils.crear_5_secretos_aleatorios(self.clave)
+        self.listaSecretos = session.query(Secreto).all()
 
         return super().setUp()
     
@@ -63,6 +68,12 @@ class ReporteDeSeguridadTestCase(unittest.TestCase):
         reporte = self.fachada.dar_reporte_seguridad()
         self.assertIsInstance(reporte['tarjetas'], int)
         self.assertEqual(reporte['tarjetas'], len(self.listaTarjetas))
+
+    def test_num_secretos(self):
+        reporte = self.fachada.dar_reporte_seguridad()
+        self.assertIsInstance(reporte['secretos'], int)
+        self.assertEqual(reporte['secretos'], len(self.listaSecretos))
+
 
     def tearDown(self) -> None:
         return super().tearDown()

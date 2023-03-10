@@ -2,7 +2,7 @@ from faker import Faker
 
 from src.modelo.declarative_base import session
 from src.modelo.clave import Clave
-from src.modelo.elemento import Login, Identificacion, Tarjeta
+from src.modelo.elemento import Login, Identificacion, Secreto, Tarjeta
 
 from datetime import date
 
@@ -65,4 +65,14 @@ def crear_5_tarjetas_aleatorias(clave: Clave):
                           direccion = data_factory.address(),
                           telefono = data_factory.phone_number())
         session.add(tarjeta)
+    session.commit()
+
+def crear_5_secretos_aleatorios(clave: Clave):
+    for _ in range(5):
+        secreto = Secreto(tipo = "secreto",
+                          nombre = data_factory.word(),
+                          nota = data_factory.sentence(),
+                          clave = clave.id,
+                          secreto = data_factory.sentence())
+        session.add(secreto)
     session.commit()
