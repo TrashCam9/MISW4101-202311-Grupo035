@@ -1,7 +1,7 @@
 '''
 Esta clase es la fachada con los métodos a implementar en la lógica
 '''
-from src.modelo.elemento import Elemento
+from src.modelo.elemento import Elemento, Login
 from src.modelo.clave import Clave
 from src.modelo.caja_de_seguridad import CajaDeSeguridad
 from src.modelo.declarative_base import engine, Base, session
@@ -89,7 +89,31 @@ class FachadaCajaDeSeguridad:
             url (string): El URL del login
             notas (string): Las notas del elemento
         '''
-        raise NotImplementedError("Método no implementado")
+        nombre_correcto = self.validar_parametro_string(nombre)
+        email_correcto = self.validar_parametro_string(email)
+        usuario_correcto = self.validar_parametro_string(usuario)
+        password_correcto = self.validar_parametro_string(password)
+        url_correcto = self.validar_parametro_string(url)
+        notas_correcto = self.validar_parametro_string(notas)
+
+        if not (nombre_correcto and email_correcto and usuario_correcto and password_correcto and url_correcto and notas_correcto):
+            raise TypeError("Los parámetros no son del tipo correcto")
+        
+        if session.query(Clave).filter_by(nombre=password).first() is None:
+            raise ValueError("El nombre de clave favorita no existe")
+
+        session.add(Login(tipo="login", nombre=nombre, nota=notas, email=email, usuario=usuario, clave=password, url=url))
+        session.commit()
+
+    def validar_parametro_string(self, param):
+        ''' Valida que un parámetro sea de tipo string
+        Parámetros:
+            param (string): El parámetro a validar
+        Retorna:
+            (bool): True si el parámetro es de tipo string y contiene las subcadenas de caracteres
+            en args, False de lo contrario
+        '''
+        return isinstance(param, str)
 
     def validar_crear_editar_login(self, id, nombre, email, usuario, password, url, notas):
         ''' Valida que un login se pueda crear o editar
