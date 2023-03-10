@@ -31,11 +31,7 @@ class ReporteDeSeguridadTestCase(unittest.TestCase):
 
     def test_num_logins(self):
         listaLogins = []
-        clave = Clave(nombre = testing_utils.give_unique_word(),
-                      clave = testing_utils.data_factory.password(),  
-                      pista = testing_utils.data_factory.sentence())
-        session.add(clave)
-        session.commit()
+        clave = testing_utils.crear_clave()
         
         for _ in range(5):
             login = Login(tipo = "login",

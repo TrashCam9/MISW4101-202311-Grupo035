@@ -16,11 +16,7 @@ class LoginTestCase(unittest.TestCase):
         self.data_factory = testing_utils.data_factory
         self.database_seeded = False
 
-        self.clave = Clave(nombre = testing_utils.give_unique_word(),
-                          clave = self.data_factory.password(),
-                          pista = self.data_factory.sentence())
-        session.add(self.clave)
-        session.commit()
+        self.clave = testing_utils.crear_clave()
 
         if session.query(Login).count() == 0:
             
