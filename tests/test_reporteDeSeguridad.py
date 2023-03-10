@@ -30,20 +30,7 @@ class ReporteDeSeguridadTestCase(unittest.TestCase):
             self.assertIn(llave, reporte.keys())
 
     def test_num_logins(self):
-        listaLogins = []
-        clave = testing_utils.crear_clave()
-        
-        for _ in range(5):
-            login = Login(tipo = "login",
-                          nombre = self.data_factory.word(),
-                          nota = self.data_factory.sentence(),
-                          clave = clave.id,
-                          usuario = self.data_factory.user_name(),
-                          email = self.data_factory.email(),
-                          url = self.data_factory.url())
-            session.add(login)
-            listaLogins.append(login)
-        session.commit()
+        listaLogins = session.query(Login).all()
 
         reporte = self.fachada.dar_reporte_seguridad()
         self.assertIsInstance(reporte['logins'], int)
