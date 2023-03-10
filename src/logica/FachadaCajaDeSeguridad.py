@@ -349,7 +349,7 @@ class FachadaCajaDeSeguridad:
             (dict): Un mapa con los valores numéricos para las llaves logins, ids, tarjetas,
             secretos, inseguras, avencer, masdeuna y nivel que conforman el reporte
         '''
-        return {'logins': 0,
+        return {'logins': session.query(Login).count(),
                 'ids': 0,
                 'tarjetas': 0,
                 'secretos': 0,
