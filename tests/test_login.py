@@ -4,7 +4,8 @@ from src.logica.FachadaCajaDeSeguridad import FachadaCajaDeSeguridad
 from src.modelo.elemento import Login
 from src.modelo.clave import Clave
 from src.modelo.declarative_base import session
-from faker import Faker
+
+from tests import testing_utils
 
 class LoginTestCase(unittest.TestCase):
     loginsList: "list[Login]"
@@ -12,14 +13,10 @@ class LoginTestCase(unittest.TestCase):
  
     def setUp(self):
         self.fachada = FachadaCajaDeSeguridad()
-        self.data_factory = Faker()
+        self.data_factory = testing_utils.data_factory
         self.database_seeded = False
-        nombre = self.data_factory.unique.word()
-        # Check if name is unique
-        while session.query(Clave).filter(Clave.nombre == nombre).count() > 0:
-            nombre = self.data_factory.unique.word()
 
-        self.clave = Clave(nombre = nombre,
+        self.clave = Clave(nombre = testing_utils.give_unique_word(),
                           clave = self.data_factory.password(),
                           pista = self.data_factory.sentence())
         session.add(self.clave)
