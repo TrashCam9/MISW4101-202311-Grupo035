@@ -24,8 +24,8 @@ class LoginTestCase(unittest.TestCase):
 
         if session.query(Login).count() == 0:
             
-            for i in range(5):
-                login = Login(tipo = "Login",
+            for _ in range(5):
+                login = Login(tipo = "login",
                               nombre = self.data_factory.word(),
                               nota = self.data_factory.sentence(),
                               clave = self.clave.id,
