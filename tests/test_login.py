@@ -14,7 +14,12 @@ class LoginTestCase(unittest.TestCase):
         self.fachada = FachadaCajaDeSeguridad()
         self.data_factory = Faker()
         self.database_seeded = False
-        self.clave = Clave(nombre = self.data_factory.word(),
+        nombre = self.data_factory.unique.word()
+        # Check if name is unique
+        while session.query(Clave).filter(Clave.nombre == nombre).count() > 0:
+            nombre = self.data_factory.unique.word()
+
+        self.clave = Clave(nombre = nombre,
                           clave = self.data_factory.password(),
                           pista = self.data_factory.sentence())
         session.add(self.clave)

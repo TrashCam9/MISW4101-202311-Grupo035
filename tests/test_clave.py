@@ -19,7 +19,7 @@ class ClaveTestCase(unittest.TestCase):
         if session.query(Clave).count() == 0:
             for _ in range(5):
                 clave = Clave(
-                    nombre=self.data_factory.word(),
+                    nombre=self.data_factory.unique.word(),
                     clave=self.data_factory.password(),
                     pista=self.data_factory.sentence(),
                 )
