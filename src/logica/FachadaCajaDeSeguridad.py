@@ -1,7 +1,7 @@
 '''
 Esta clase es la fachada con los métodos a implementar en la lógica
 '''
-from src.modelo.elemento import Elemento, Identificacion, Login
+from src.modelo.elemento import Elemento, Identificacion, Login, Tarjeta
 from src.modelo.clave import Clave
 from src.modelo.caja_de_seguridad import CajaDeSeguridad
 from src.modelo.declarative_base import engine, Base, session
@@ -351,7 +351,7 @@ class FachadaCajaDeSeguridad:
         '''
         return {'logins': session.query(Login).count(),
                 'ids': session.query(Identificacion).count(),
-                'tarjetas': 0,
+                'tarjetas': session.query(Tarjeta).count(),
                 'secretos': 0,
                 'inseguras': 0,
                 'avencer': 0,
