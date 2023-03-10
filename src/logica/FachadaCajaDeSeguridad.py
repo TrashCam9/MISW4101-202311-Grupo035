@@ -1,10 +1,10 @@
 '''
 Esta clase es la fachada con los métodos a implementar en la lógica
 '''
-from src.modelo.elemento import Elemento
+from src.modelo.elemento import Elemento, Login
 from src.modelo.clave import Clave
 from src.modelo.caja_de_seguridad import CajaDeSeguridad
-from src.modelo.declarative_base import engine, Base, Session
+from src.modelo.declarative_base import engine, Base, session
 
 import string
 import random
@@ -13,14 +13,13 @@ class FachadaCajaDeSeguridad:
 
     def __init__(self):
         Base.metadata.create_all(engine)
-        self.session = Session()
 
         # Creamos la caja de seguridad si no existe
-        caja = self.session.query(CajaDeSeguridad).first()
+        caja = session.query(CajaDeSeguridad).first()
         if caja is None:
             caja = CajaDeSeguridad()
-            self.session.add(caja)
-            self.session.commit()
+            session.add(caja)
+            session.commit()
             
 
     def dar_elementos(self):
@@ -28,7 +27,7 @@ class FachadaCajaDeSeguridad:
         Retorna:
             (list): La lista con los dict o los objetos de los elementos
         '''
-        elementos = self.session.query(Elemento).all()
+        elementos = session.query(Elemento).all()
         return elementos
 
     def dar_elemento(self, id_elemento):
@@ -45,7 +44,7 @@ class FachadaCajaDeSeguridad:
         Retorna:
             (list): La lista con los dict o los objetos de las claves favoritas
         '''
-        claves = self.session.query(Clave).all()
+        claves = session.query(Clave).all()
         return claves
 
     def dar_clave_favorita(self, id_clave):
@@ -78,7 +77,7 @@ class FachadaCajaDeSeguridad:
         Rertorna:
             (string): La clave maestra de la caja de seguridad
         '''
-        return self.session.query(CajaDeSeguridad).first().clave_maestra
+        return session.query(CajaDeSeguridad).first().clave_maestra
 
     def crear_login(self, nombre, email, usuario, password, url, notas):
         ''' Crea un elemento login
@@ -90,7 +89,31 @@ class FachadaCajaDeSeguridad:
             url (string): El URL del login
             notas (string): Las notas del elemento
         '''
-        raise NotImplementedError("Método no implementado")
+        nombre_correcto = self.validar_parametro_string(nombre)
+        email_correcto = self.validar_parametro_string(email)
+        usuario_correcto = self.validar_parametro_string(usuario)
+        password_correcto = self.validar_parametro_string(password)
+        url_correcto = self.validar_parametro_string(url)
+        notas_correcto = self.validar_parametro_string(notas)
+
+        if not (nombre_correcto and email_correcto and usuario_correcto and password_correcto and url_correcto and notas_correcto):
+            raise TypeError("Los parámetros no son del tipo correcto")
+        
+        if session.query(Clave).filter_by(nombre=password).first() is None:
+            raise ValueError("El nombre de clave favorita no existe")
+
+        session.add(Login(tipo="login", nombre=nombre, nota=notas, email=email, usuario=usuario, clave=password, url=url))
+        session.commit()
+
+    def validar_parametro_string(self, param):
+        ''' Valida que un parámetro sea de tipo string
+        Parámetros:
+            param (string): El parámetro a validar
+        Retorna:
+            (bool): True si el parámetro es de tipo string y contiene las subcadenas de caracteres
+            en args, False de lo contrario
+        '''
+        return isinstance(param, str)
 
     def validar_crear_editar_login(self, id, nombre, email, usuario, password, url, notas):
         ''' Valida que un login se pueda crear o editar
@@ -250,11 +273,11 @@ class FachadaCajaDeSeguridad:
             pista (string): La pista para recordar la clave favorita
         '''
         if error_message := self.validar_crear_editar_clave(nombre, clave, pista):
-            raise ValueError(error_message)
+            raise TypeError(error_message)
 
         clave = Clave(nombre=nombre, clave=clave, pista=pista)
-        self.session.add(clave)
-        self.session.commit()
+        session.add(clave)
+        session.commit()
 
     def validar_crear_editar_clave(self, nombre, clave, pista):
         ''' Valida que se pueda crear o editar una clave favorita
@@ -267,11 +290,6 @@ class FachadaCajaDeSeguridad:
             validación o una cadena de caracteres vacía si no hay errores.
         '''
 
-        # Validar que los parámetros no sean nulos
-        if not nombre or not clave or not pista:
-            return "Todos los campos son obligatorios"
-        
-        # Validar que los parámetros sean de tipo string
         if not(isinstance(nombre, str) and isinstance(clave, str) and isinstance(pista, str)):
             return "Todos los campos deben ser de tipo string"
         return ""
@@ -279,11 +297,25 @@ class FachadaCajaDeSeguridad:
     def editar_clave(self, id, nombre, clave, pista):
         ''' Edita una clave favorita
         Parámetros:
+            id (int): El id de la clave favorita
             nombre (string): El nombre de la clave favorita
-            clave (string): El password o clae de la clave favorita
+            clave (string): El password o clave de la clave favorita
             pista (string): La pista para recordar la clave favorita
         '''
-        raise NotImplementedError("Método no implementado")
+        if not isinstance(clave, str) or not isinstance(pista, str) or not isinstance(nombre, str):
+            raise TypeError("Todos los campos deben ser de tipo string")
+        if (len(session.query(Clave).filter(Clave.nombre == nombre).all())>0):
+            raise ValueError("Ya existe una clave favorita con ese nombre.")
+        if (len(nombre) < 3 or len(pista) <3 or len(clave) == 0):
+            raise ValueError("El nombre de la clave favorita y la pista deben tener al menos 3 caracteres. Y la longitud de la clave debe ser mayor a 0")
+        if (len(session.query(Clave).filter(Clave.id == id).all())==0):
+            raise ValueError("La clave favorita referenciada no existe.")
+        else: 
+            clave_busqueda = session.query(Clave).filter(Clave.id == id).first()
+            clave_busqueda.clave = clave
+            clave_busqueda.pista = pista
+            session.commit()
+        
 
     def generar_clave(self):
         ''' Genera una clave para una clave favorita
