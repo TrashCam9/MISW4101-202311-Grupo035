@@ -2,7 +2,7 @@ import unittest
 
 from src.modelo.declarative_base import session
 
-from src.modelo.elemento import Login, Identificacion
+from src.modelo.elemento import Login, Identificacion, Tarjeta
 from src.modelo.clave import Clave
 
 from src.logica.FachadaCajaDeSeguridad import FachadaCajaDeSeguridad
@@ -12,6 +12,7 @@ from tests import testing_utils
 class ReporteDeSeguridadTestCase(unittest.TestCase):
     listaLogins: "list[Clave]" = []
     listaIds: "list[Identificacion]" = []
+    listaTarjetas: "list[Tarjeta]" = []
 
     def setUp(self) -> None:
         self.fachada = FachadaCajaDeSeguridad()    
@@ -32,8 +33,11 @@ class ReporteDeSeguridadTestCase(unittest.TestCase):
             testing_utils.crear_5_identificacioens_aleatorias()
         self.listaIds = session.query(Identificacion).all()
 
-        return super().setUp()
+        if session.query(Tarjeta).count() == 0:
+            testing_utils.crear_5_tarjetas_aleatorias(self.clave)
+        self.listaTarjetas = session.query(Tarjeta).all()
 
+        return super().setUp()
     
     def test_retorna_diccionario(self):
         reporte = self.fachada.dar_reporte_seguridad()
@@ -46,16 +50,19 @@ class ReporteDeSeguridadTestCase(unittest.TestCase):
             self.assertIn(llave, reporte.keys())
 
     def test_num_logins(self):
-        listaLogins = session.query(Login).all()
         reporte = self.fachada.dar_reporte_seguridad()
         self.assertIsInstance(reporte['logins'], int)
-        self.assertEqual(reporte['logins'], len(listaLogins))
+        self.assertEqual(reporte['logins'], len(self.listaLogins))
 
     def test_num_ids(self):
-        listaIds = session.query(Identificacion).all()
         reporte = self.fachada.dar_reporte_seguridad()
         self.assertIsInstance(reporte['ids'], int)
-        self.assertEqual(reporte['ids'], len(listaIds))
+        self.assertEqual(reporte['ids'], len(self.listaIds))
+
+    def test_num_tarjetas(self):
+        reporte = self.fachada.dar_reporte_seguridad()
+        self.assertIsInstance(reporte['tarjetas'], int)
+        self.assertEqual(reporte['tarjetas'], len(self.listaTarjetas))
 
     def tearDown(self) -> None:
         return super().tearDown()

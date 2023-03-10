@@ -2,7 +2,7 @@ from faker import Faker
 
 from src.modelo.declarative_base import session
 from src.modelo.clave import Clave
-from src.modelo.elemento import Login, Identificacion
+from src.modelo.elemento import Login, Identificacion, Tarjeta
 
 from datetime import date
 
@@ -49,4 +49,20 @@ def crear_5_identificacioens_aleatorias():
                                         fechaExpedicion = fecha_expedicion,
                                         fechaVencimiento = fecha_vencimiento)
         session.add(identificacion)
+    session.commit()
+
+def crear_5_tarjetas_aleatorias(clave: Clave):
+    for _ in range(5):
+        fecha_vencimiento = date(*map(int, data_factory.date().split("-")))
+        tarjeta = Tarjeta(tipo = "tarjeta",
+                          nombre = data_factory.word(),
+                          nota = data_factory.sentence(),
+                          clave = clave.id,
+                          numero = data_factory.random_int(),
+                          titular = data_factory.name(),
+                          fecha_vencimiento = fecha_vencimiento,
+                          codigo_seguridad = data_factory.random_int(),
+                          direccion = data_factory.address(),
+                          telefono = data_factory.phone_number())
+        session.add(tarjeta)
     session.commit()
