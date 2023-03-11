@@ -382,4 +382,4 @@ class FachadaCajaDeSeguridad:
                 'inseguras': inseguras,
                 'avencer': avencer,
                 'masdeuna': masdeuna,
-                'nivel': 0}
+                'nivel': 0.0}
