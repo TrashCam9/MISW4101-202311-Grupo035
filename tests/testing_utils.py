@@ -10,7 +10,10 @@ data_factory = Faker()
 
 
 def give_unique_word():
-    return data_factory.unique.word()
+    word = data_factory.unique.word()
+    while session.query(Clave).filter_by(nombre=word).first():
+        word = data_factory.unique.word()
+    return word
 
 def crear_clave(segura: bool = False):
     password = data_factory.word()

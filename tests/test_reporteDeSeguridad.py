@@ -110,5 +110,17 @@ class ReporteDeSeguridadTestCase(unittest.TestCase):
         self.assertIsInstance(reporte['avencer'], int)
         self.assertEqual(reporte['avencer'], avencer)
 
+    def test_clave_mas_de_un_elemento(self):
+        listaClaves = session.query(Clave).all()
+        masdeuna = 0
+        for clave in listaClaves:
+            if len(clave.elementos) > 1:
+                masdeuna += 1
+
+        reporte = self.fachada.dar_reporte_seguridad()
+        self.assertIsInstance(reporte['masdeuna'], int)
+        self.assertEqual(reporte['masdeuna'], masdeuna)
+
+
     def tearDown(self) -> None:
         return super().tearDown()
