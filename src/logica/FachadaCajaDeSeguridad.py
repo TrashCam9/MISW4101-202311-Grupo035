@@ -1,6 +1,7 @@
 '''
 Esta clase es la fachada con los métodos a implementar en la lógica
 '''
+from datetime import date, timedelta
 from src.modelo.elemento import Elemento, Identificacion, Login, Secreto, Tarjeta
 from src.modelo.clave import Clave
 from src.modelo.caja_de_seguridad import CajaDeSeguridad
@@ -360,11 +361,20 @@ class FachadaCajaDeSeguridad:
                     ' ' not in clave.clave):
                 inseguras += 1
 
+        # Calcular elementos a vencer
+        avencer = 0
+        for tarjeta in session.query(Tarjeta).all():
+            if tarjeta.fecha_vencimiento < date.today() + timedelta(days=30):
+                avencer += 1
+        for identificacion in session.query(Identificacion).all():
+            if identificacion.fechaVencimiento < date.today() + timedelta(days=30):
+                avencer += 1
+
         return {'logins': session.query(Login).count(),
                 'ids': session.query(Identificacion).count(),
                 'tarjetas': session.query(Tarjeta).count(),
                 'secretos': session.query(Secreto).count(),
                 'inseguras': inseguras,
-                'avencer': 0,
+                'avencer': avencer,
                 'masdeuna': 0,
                 'nivel': 0}
