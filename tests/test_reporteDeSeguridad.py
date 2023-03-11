@@ -74,6 +74,25 @@ class ReporteDeSeguridadTestCase(unittest.TestCase):
         self.assertIsInstance(reporte['secretos'], int)
         self.assertEqual(reporte['secretos'], len(self.listaSecretos))
 
+    def test_num_inseguras(self):
+        # Crear 3 claves seguras y 2 inseguras si hay menos de 5 claves
+        if session.query(Clave).count() < 5:
+            for _ in range(3):
+                testing_utils.crear_clave(segura=True)
+            for _ in range(2):
+                testing_utils.crear_clave(segura=False)
+
+        listaClaves = session.query(Clave).all()
+        inseguras = 0
+        print("Claves: ")
+        for clave in listaClaves:
+            print(clave.clave)
+            if not testing_utils.verificar_clave_segura(str(clave.clave)):
+                inseguras += 1
+
+        reporte = self.fachada.dar_reporte_seguridad()
+        self.assertIsInstance(reporte['inseguras'], int)
+        self.assertEqual(reporte['inseguras'], inseguras)
 
     def tearDown(self) -> None:
         return super().tearDown()

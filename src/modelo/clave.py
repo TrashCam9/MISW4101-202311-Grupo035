@@ -13,5 +13,8 @@ class Clave(Base):
     elementos = relationship(
         'ElementoConClave', cascade='all, delete, delete-orphan')
 
+    def __len__(self):
+        return len(self.clave)
+
     def __getitem__(self, key):
         return getattr(self, key)

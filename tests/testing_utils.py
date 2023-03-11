@@ -10,14 +10,15 @@ data_factory = Faker()
 
 
 def give_unique_word():
-    word = data_factory.unique.word()
-    while session.query(Clave).filter(Clave.nombre == word).count() > 0:
-        word = data_factory.unique.word()
-    return word
+    return data_factory.unique.word()
 
-def crear_clave():
+def crear_clave(segura: bool = False):
+    password = data_factory.word()
+    if segura:
+        password = "?aA1;bB2"
+    
     clave = Clave(nombre=give_unique_word(),
-                  clave=data_factory.password(),
+                  clave=password,
                   pista=data_factory.sentence())
     session.add(clave)
     session.commit()
@@ -84,8 +85,5 @@ def crear_5_secretos_aleatorios(clave: Clave):
     session.commit()
 
 
-
 def verificar_clave_segura(clave: str) -> bool:
     return len(clave) >= 8 and ' ' not in clave and any(char.isdigit() for char in clave) and any(char.isupper() for char in clave) and any(char.islower() for char in clave) and any(char in "?-*!@#$/(){}=.,;:" for char in clave)
-
-print(verificar_clave_segura(crear_clave()))
