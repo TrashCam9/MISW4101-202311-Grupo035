@@ -129,26 +129,27 @@ class ReporteDeSeguridadTestCase(unittest.TestCase):
 
         listaIds = session.query(Identificacion).all()
         listaTarjetas = session.query(Tarjeta).all()
-        porcentajeVencidas = 0
+        porcentajeNoVencidas = 0
         for identificacion in listaIds:
-            if not testing_utils.verificar_vencimiento_3_meses(identificacion.fechaVencimiento):
-                porcentajeVencidas += 1
+            if testing_utils.verificar_vencimiento_3_meses(identificacion.fechaVencimiento):
+                porcentajeNoVencidas += 1
         for tarjeta in listaTarjetas:
-            if not testing_utils.verificar_vencimiento_3_meses(tarjeta.fecha_vencimiento):
-                porcentajeVencidas += 1
-        porcentajeVencidas /= (len(listaIds) + len(listaTarjetas))
+            if testing_utils.verificar_vencimiento_3_meses(tarjeta.fecha_vencimiento):
+                porcentajeNoVencidas += 1
+        porcentajeNoVencidas /= (len(listaIds) + len(listaTarjetas))
 
-        porcentajeR = 0
+        porcentajeR = 1
         for clave in listaClaves:
             if len(clave.elementos) > 3:
                 porcentajeR = 0
                 break
             elif len(clave.elementos) > 1:
                 porcentajeR = 0.5
+                break
         if porcentajeR != 0:
             porcentajeR = 1
 
-        nivel = porcentajeSeguras * 0.5 + porcentajeVencidas * 0.2 + porcentajeR * 0.3
+        nivel = porcentajeSeguras * 0.5 + porcentajeNoVencidas * 0.2 + porcentajeR * 0.3
 
         reporte = self.fachada.dar_reporte_seguridad()
         self.assertIsInstance(reporte['nivel'], float)

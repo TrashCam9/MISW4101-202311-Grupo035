@@ -350,10 +350,11 @@ class FachadaCajaDeSeguridad:
             (dict): Un mapa con los valores numéricos para las llaves logins, ids, tarjetas,
             secretos, inseguras, avencer, masdeuna y nivel que conforman el reporte
         '''
+        listaClaves = session.query(Clave).all()
 
         # Calcular claves inseguras
         inseguras = 0
-        for clave in session.query(Clave).all():
+        for clave in listaClaves:
             if not (any(c.islower() for c in clave.clave) and 
                     any(c.isupper() for c in clave.clave) and 
                     any(c.isdigit() for c in clave.clave) and 
@@ -371,9 +372,23 @@ class FachadaCajaDeSeguridad:
                 avencer += 1
 
         masdeuna = 0
-        for clave in session.query(Clave).all():
+        for clave in listaClaves:
             if len(clave.elementos) > 1:
                 masdeuna += 1
+
+        # SC: El procentaje de claves que son seguras en la lista de claves
+
+        # SC = (total_claves - claves_inseguras) / total_claves
+        sc = (len(listaClaves) - inseguras) / len(listaClaves)
+        v = avencer / (len(session.query(Tarjeta).all()) + len(session.query(Identificacion).all()))
+        r = 1
+        for clave in listaClaves:
+            if len(clave.elementos) > 3:
+                r = 0
+                break
+            elif len(clave.elementos) > 1:
+                r = 0.5
+                break
 
         return {'logins': session.query(Login).count(),
                 'ids': session.query(Identificacion).count(),
@@ -382,4 +397,4 @@ class FachadaCajaDeSeguridad:
                 'inseguras': inseguras,
                 'avencer': avencer,
                 'masdeuna': masdeuna,
-                'nivel': 0.0}
+                'nivel': sc * 0.5 + v * 0.2 + r * 0.3}
