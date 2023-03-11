@@ -370,11 +370,16 @@ class FachadaCajaDeSeguridad:
             if identificacion.fechaVencimiento < date.today() + timedelta(days=30):
                 avencer += 1
 
+        masdeuna = 0
+        for clave in session.query(Clave).all():
+            if len(clave.elementos) > 1:
+                masdeuna += 1
+
         return {'logins': session.query(Login).count(),
                 'ids': session.query(Identificacion).count(),
                 'tarjetas': session.query(Tarjeta).count(),
                 'secretos': session.query(Secreto).count(),
                 'inseguras': inseguras,
                 'avencer': avencer,
-                'masdeuna': 0,
+                'masdeuna': masdeuna,
                 'nivel': 0}

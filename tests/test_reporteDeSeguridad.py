@@ -84,9 +84,7 @@ class ReporteDeSeguridadTestCase(unittest.TestCase):
 
         listaClaves = session.query(Clave).all()
         inseguras = 0
-        print("Claves: ")
         for clave in listaClaves:
-            print(clave.clave)
             if not testing_utils.verificar_clave_segura(str(clave.clave)):
                 inseguras += 1
 

@@ -33,7 +33,7 @@ def crear_5_logins_aleatorios(clave: Clave):
         login = Login(tipo="login",
                       nombre=data_factory.word(),
                       nota=data_factory.sentence(),
-                      clave=clave.id,
+                      clave=clave.nombre,
                       usuario=data_factory.user_name(),
                       email=data_factory.email(),
                       url=data_factory.url())
@@ -66,7 +66,7 @@ def crear_5_tarjetas_aleatorias(clave: Clave):
         tarjeta = Tarjeta(tipo="tarjeta",
                           nombre=data_factory.word(),
                           nota=data_factory.sentence(),
-                          clave=clave.id,
+                          clave=clave.nombre,
                           numero=data_factory.random_int(),
                           titular=data_factory.name(),
                           fecha_vencimiento=fecha_vencimiento,
@@ -82,7 +82,7 @@ def crear_5_secretos_aleatorios(clave: Clave):
         secreto = Secreto(tipo="secreto",
                           nombre=data_factory.word(),
                           nota=data_factory.sentence(),
-                          clave=clave.id,
+                          clave=clave.nombre,
                           secreto=data_factory.sentence())
         session.add(secreto)
     session.commit()
