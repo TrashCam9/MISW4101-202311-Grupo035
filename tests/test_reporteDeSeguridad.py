@@ -94,5 +94,21 @@ class ReporteDeSeguridadTestCase(unittest.TestCase):
         self.assertIsInstance(reporte['inseguras'], int)
         self.assertEqual(reporte['inseguras'], inseguras)
 
+    def test_elementos_avencer(self):
+        # Identificacions y tarjetas
+        listaIds = session.query(Identificacion).all()
+        listaTarjetas = session.query(Tarjeta).all()
+        avencer = 0
+        for identificacion in listaIds:
+            if testing_utils.verificar_vencimiento_3_meses(identificacion.fechaVencimiento):
+                avencer += 1
+        for tarjeta in listaTarjetas:
+            if testing_utils.verificar_vencimiento_3_meses(tarjeta.fecha_vencimiento):
+                avencer += 1
+
+        reporte = self.fachada.dar_reporte_seguridad()
+        self.assertIsInstance(reporte['avencer'], int)
+        self.assertEqual(reporte['avencer'], avencer)
+
     def tearDown(self) -> None:
         return super().tearDown()
