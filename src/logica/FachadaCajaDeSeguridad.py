@@ -349,11 +349,22 @@ class FachadaCajaDeSeguridad:
             (dict): Un mapa con los valores numéricos para las llaves logins, ids, tarjetas,
             secretos, inseguras, avencer, masdeuna y nivel que conforman el reporte
         '''
+
+        # Calcular claves inseguras
+        inseguras = 0
+        for clave in session.query(Clave).all():
+            if not (any(c.islower() for c in clave.clave) and 
+                    any(c.isupper() for c in clave.clave) and 
+                    any(c.isdigit() for c in clave.clave) and 
+                    any(c in "?-*!@#$()/{}=.,;:" for c in clave.clave) and 
+                    ' ' not in clave.clave):
+                inseguras += 1
+
         return {'logins': session.query(Login).count(),
                 'ids': session.query(Identificacion).count(),
                 'tarjetas': session.query(Tarjeta).count(),
                 'secretos': session.query(Secreto).count(),
-                'inseguras': 0,
+                'inseguras': inseguras,
                 'avencer': 0,
                 'masdeuna': 0,
                 'nivel': 0}
