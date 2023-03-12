@@ -96,10 +96,10 @@ class ReporteDeSeguridadTestCase(unittest.TestCase):
     def test_elementos_avencer(self):
         avencer = 0
         for identificacion in self.listaIds:
-            if testing_utils.verificar_vencimiento_3_meses(identificacion.fechaVencimiento):
+            if testing_utils.verificar_vencimiento(identificacion.fechaVencimiento):
                 avencer += 1
         for tarjeta in self.listaTarjetas:
-            if testing_utils.verificar_vencimiento_3_meses(tarjeta.fecha_vencimiento):
+            if testing_utils.verificar_vencimiento(tarjeta.fecha_vencimiento):
                 avencer += 1
 
         reporte = self.fachada.dar_reporte_seguridad()
@@ -124,10 +124,10 @@ class ReporteDeSeguridadTestCase(unittest.TestCase):
         porcentajeSeguras = seguras / len(self.listaClaves)
         porcentajeNoVencidas = 0
         for identificacion in self.listaIds:
-            if testing_utils.verificar_vencimiento_3_meses(identificacion.fechaVencimiento):
+            if testing_utils.verificar_vencimiento(identificacion.fechaVencimiento):
                 porcentajeNoVencidas += 1
         for tarjeta in self.listaTarjetas:
-            if testing_utils.verificar_vencimiento_3_meses(tarjeta.fecha_vencimiento):
+            if testing_utils.verificar_vencimiento(tarjeta.fecha_vencimiento):
                 porcentajeNoVencidas += 1
         porcentajeNoVencidas /= (len(self.listaIds) + len(self.listaTarjetas))
 

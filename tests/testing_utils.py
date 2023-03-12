@@ -91,6 +91,6 @@ def crear_5_secretos_aleatorios(clave: Clave):
 def verificar_clave_segura(clave: str) -> bool:
     return len(clave) >= 8 and ' ' not in clave and any(char.isdigit() for char in clave) and any(char.isupper() for char in clave) and any(char.islower() for char in clave) and any(char in "?-*!@#$/(){}=.,;:" for char in clave)
 
-def verificar_vencimiento_3_meses(fecha_vencimiento: date) -> bool:
-    return fecha_vencimiento < (date.today() + timedelta(days=90))
+def verificar_vencimiento(fecha_vencimiento: date) -> bool:
+    return fecha_vencimiento < (date.today() + timedelta(days=30))
 
