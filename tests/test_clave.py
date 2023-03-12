@@ -25,7 +25,7 @@ class ClaveTestCase(unittest.TestCase):
         self.assertRaises(TypeError, self.fachada.crear_clave, 123, 123, 123)
 
     def test_crear_clave(self):
-        nombre_clave = testing_utils.give_unique_word()
+        nombre_clave = testing_utils.give_unique_word(Clave)
         self.fachada.crear_clave(
             nombre=nombre_clave,
             clave=self.data_factory.password(),

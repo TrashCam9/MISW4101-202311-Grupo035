@@ -147,14 +147,24 @@ class FachadaCajaDeSeguridad:
         ''' Crea un elemento identificación
         Parámetros:
             nombre_elemento (string): El nombre del elemento
-            numero (string): El número del elemento
+            numero (integer): El número del elemento
             nombre_completo (string): El nombre completo de la persona en la identificación
             fnacimiento (string): La fecha de nacimiento de la persona en la identificación
             fexpedicion (string): La fecha de expedición en la identificación
             fvencimiento (string): La feha de vencimiento en la identificación
             notas (string): Las notas del elemento
         '''
-        raise NotImplementedError("Método no implementado")
+        self.validar_crear_editar_id(None, nombre_elemento, numero, nombre_completo, fnacimiento, fexpedicion, fvencimiento, notas)
+        identificacion = Identificacion(tipo = "Identificacion",
+                                        nombre = nombre_elemento,
+                                        nota = notas,
+                                        numero = numero,
+                                        nombreCompleto = nombre_completo,
+                                        fechaNacimiento = fnacimiento,
+                                        fechaExpedicion = fexpedicion,
+                                        fechaVencimiento = fvencimiento)
+        session.add(identificacion)
+        session.commit()
 
     def validar_crear_editar_id(self, id, nombre_elemento, numero, nombre_completo, fnacimiento, fexpedicion, fvencimiento, notas):
         ''' Valida que una identificación se pueda crear o editar
@@ -170,7 +180,15 @@ class FachadaCajaDeSeguridad:
             (string): El mensaje de error generado al presentarse errores en la 
             validación o una cadena de caracteres vacía si no hay errores.
         '''
-        raise NotImplementedError("Método no implementado")
+        if not isinstance(nombre_elemento, str) or not isinstance(numero, int) or not isinstance(nombre_completo, str) or not isinstance(fnacimiento, date) or not isinstance(fexpedicion, date) or not isinstance(fvencimiento, date) or not isinstance (notas, str):
+            raise TypeError("Los parámetros no son del tipo correcto")
+        if len(nombre_elemento) < 3 or len(nombre_completo) < 3 or len(notas) < 3:
+            raise ValueError("Los parámetros no cumplen con la longitud mínima")
+        if len(nombre_elemento) > 255 or len(nombre_completo) > 255 or len(notas) > 512:
+            raise ValueError("Los parámetros no cumplen con la longitud máxima")
+        if session.query(Identificacion).filter_by(nombre=nombre_elemento).first() is not None:
+            if id == None:
+                raise ValueError("El nombre de la identificación ya existe")
 
     def editar_id(self, id,nombre_elemento, numero, nombre_completo, fnacimiento, fexpedicion, fvencimiento, notas):
         ''' Edita un elemento identificación

@@ -1,26 +1,30 @@
+import random
+import string
 from faker import Faker
-
-from src.modelo.declarative_base import session
 from src.modelo.clave import Clave
 from src.modelo.elemento import Login, Identificacion, Secreto, Tarjeta
 
 from datetime import date, timedelta
 
+from src.modelo.declarative_base import session
+
 data_factory = Faker()
 
-
-def give_unique_word():
+def give_unique_word(obj):
     word = data_factory.unique.word()
-    while session.query(Clave).filter_by(nombre=word).first():
+    while session.query(obj).filter(obj.nombre == word).count() > 0:
         word = data_factory.unique.word()
     return word
+
+def generate_word_of_length(n):
+    return ''.join(random.choices(string.ascii_letters, k=n))
 
 def crear_clave(segura: bool = False):
     password = data_factory.word()
     if segura:
         password = "?aA1;bB2"
     
-    clave = Clave(nombre=give_unique_word(),
+    clave = Clave(nombre=give_unique_word(Clave),
                   clave=password,
                   pista=data_factory.sentence())
     session.add(clave)
@@ -31,7 +35,7 @@ def crear_clave(segura: bool = False):
 def crear_5_logins_aleatorios(clave: Clave):
     for _ in range(5):
         login = Login(tipo="login",
-                      nombre=data_factory.word(),
+                      nombre=give_unique_word(Login),
                       nota=data_factory.sentence(),
                       clave=clave.nombre,
                       usuario=data_factory.user_name(),
@@ -49,7 +53,7 @@ def crear_5_identificacioens_aleatorias():
         fecha_vencimiento = fecha_expedicion.replace(
             year=fecha_expedicion.year + 10)
         identificacion = Identificacion(tipo="identificacion",
-                                        nombre=data_factory.word(),
+                                        nombre=give_unique_word(Identificacion),
                                         nota=data_factory.sentence(),
                                         numero=data_factory.random_int(),
                                         nombreCompleto=data_factory.name(),
@@ -64,7 +68,7 @@ def crear_5_tarjetas_aleatorias(clave: Clave):
     for _ in range(5):
         fecha_vencimiento = date(*map(int, data_factory.date().split("-")))
         tarjeta = Tarjeta(tipo="tarjeta",
-                          nombre=data_factory.word(),
+                          nombre=give_unique_word(Tarjeta),
                           nota=data_factory.sentence(),
                           clave=clave.nombre,
                           numero=data_factory.random_int(),
@@ -80,7 +84,7 @@ def crear_5_tarjetas_aleatorias(clave: Clave):
 def crear_5_secretos_aleatorios(clave: Clave):
     for _ in range(5):
         secreto = Secreto(tipo="secreto",
-                          nombre=data_factory.word(),
+                          nombre=give_unique_word(Secreto),
                           nota=data_factory.sentence(),
                           clave=clave.nombre,
                           secreto=data_factory.sentence())
