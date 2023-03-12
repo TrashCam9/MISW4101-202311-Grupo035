@@ -26,19 +26,19 @@ class ReporteDeSeguridadTestCase(unittest.TestCase):
         else:
             self.clave = session.query(Clave).first()
 
-        if session.query(Login).count() == 0:
+        if len(session.query(Login).all()) == 0:
             testing_utils.crear_5_logins_aleatorios(self.clave)
         self.listaLogins = session.query(Login).all()
 
-        if session.query(Identificacion).count() == 0:
+        if len(session.query(Identificacion).all()) == 0:
             testing_utils.crear_5_identificacioens_aleatorias()
         self.listaIds = session.query(Identificacion).all()
 
-        if session.query(Tarjeta).count() == 0:
+        if len(session.query(Tarjeta).all()) == 0:
             testing_utils.crear_5_tarjetas_aleatorias(self.clave)
         self.listaTarjetas = session.query(Tarjeta).all()
 
-        if session.query(Secreto).count() == 0:
+        if len(session.query(Secreto).all()) == 0:
             testing_utils.crear_5_secretos_aleatorios(self.clave)
         self.listaSecretos = session.query(Secreto).all()
     
