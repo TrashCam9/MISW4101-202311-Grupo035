@@ -90,14 +90,11 @@ class ReporteDeSeguridadTestCase(unittest.TestCase):
         self.assertEqual(reporte['inseguras'], inseguras)
 
     def test_elementos_avencer(self):
-        # Identificacions y tarjetas
-        listaIds = session.query(Identificacion).all()
-        listaTarjetas = session.query(Tarjeta).all()
         avencer = 0
-        for identificacion in listaIds:
+        for identificacion in self.listaIds:
             if testing_utils.verificar_vencimiento_3_meses(identificacion.fechaVencimiento):
                 avencer += 1
-        for tarjeta in listaTarjetas:
+        for tarjeta in self.listaTarjetas:
             if testing_utils.verificar_vencimiento_3_meses(tarjeta.fecha_vencimiento):
                 avencer += 1
 
