@@ -2,7 +2,7 @@ import unittest
 
 from src.modelo.declarative_base import session
 
-from src.modelo.elemento import Login, Identificacion, Secreto, Tarjeta
+from src.modelo.elemento import Elemento, ElementoConClave, Login, Identificacion, Secreto, Tarjeta
 from src.modelo.clave import Clave
 
 from src.logica.FachadaCajaDeSeguridad import FachadaCajaDeSeguridad
@@ -153,4 +153,12 @@ class ReporteDeSeguridadTestCase(unittest.TestCase):
         self.assertEqual(reporte['nivel'], nivel)
 
     def tearDown(self) -> None:
-        return super().tearDown()
+        session.query(ElementoConClave).delete()
+        session.query(Elemento).delete()
+        session.query(Login).delete()
+        session.query(Identificacion).delete()
+        session.query(Tarjeta).delete()
+        session.query(Secreto).delete()
+        session.query(Clave).delete()
+        session.commit()
+        session.close()
