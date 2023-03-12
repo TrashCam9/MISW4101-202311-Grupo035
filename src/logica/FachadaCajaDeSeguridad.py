@@ -368,49 +368,63 @@ class FachadaCajaDeSeguridad:
             (dict): Un mapa con los valores numéricos para las llaves logins, ids, tarjetas,
             secretos, inseguras, avencer, masdeuna y nivel que conforman el reporte
         '''
+        reporte = {
+            'logins': 0,
+            'ids': 0,
+            'tarjetas': 0,
+            'secretos': 0,
+            'inseguras': 0,
+            'avencer': 0,
+            'masdeuna': 0,
+            'nivel': 0
+        }
         listaClaves = session.query(Clave).all()
+        if len(listaClaves) != 0:
+            inseguras = 0
+            masdeuna = 0
+            for clave in listaClaves:
+                if not (any(c.islower() for c in clave.clave) and 
+                        any(c.isupper() for c in clave.clave) and 
+                        any(c.isdigit() for c in clave.clave) and 
+                        any(c in "?-*!@#$()/{}=.,;:" for c in clave.clave) and 
+                        ' ' not in clave.clave):
+                    inseguras += 1
+                if len(clave.elementos) > 1:
+                    masdeuna += 1
 
-        inseguras = 0
-        masdeuna = 0
-        for clave in listaClaves:
-            if not (any(c.islower() for c in clave.clave) and 
-                    any(c.isupper() for c in clave.clave) and 
-                    any(c.isdigit() for c in clave.clave) and 
-                    any(c in "?-*!@#$()/{}=.,;:" for c in clave.clave) and 
-                    ' ' not in clave.clave):
-                inseguras += 1
-            if len(clave.elementos) > 1:
-                masdeuna += 1
+            # SC: El procentaje de claves que son seguras en la lista de claves
+            # SC = (total_claves - claves_inseguras) / total_claves
+            sc = (len(listaClaves) - inseguras) / len(listaClaves)
 
-        # Calcular elementos a vencer
-        avencer = 0
-        for tarjeta in session.query(Tarjeta).all():
-            if tarjeta.fecha_vencimiento < date.today() + timedelta(days=30):
-                avencer += 1
-        for identificacion in session.query(Identificacion).all():
-            if identificacion.fechaVencimiento < date.today() + timedelta(days=30):
-                avencer += 1
+            # Calcular elementos a vencer
+            v = 0
+            avencer = 0
+            if len(session.query(Tarjeta).all()) + len(session.query(Identificacion).all()) != 0:
+                
+                for tarjeta in session.query(Tarjeta).all():
+                    if tarjeta.fecha_vencimiento < date.today() + timedelta(days=30):
+                        avencer += 1
+                for identificacion in session.query(Identificacion).all():
+                    if identificacion.fechaVencimiento < date.today() + timedelta(days=30):
+                        avencer += 1
+                v = avencer / (len(session.query(Tarjeta).all()) + len(session.query(Identificacion).all()))
+            
+            r = 1
+            tieneMasDeUno = False
+            i = 0
+            while not tieneMasDeUno and i < len(listaClaves):
+                if len(listaClaves[i].elementos) > 1:
+                    if len(listaClaves[i].elementos) > 3:
+                        r = 0
+                    tieneMasDeUno = True
+                i += 1
+            reporte['logins'] = session.query(Login).count()
+            reporte['ids'] = session.query(Identificacion).count()
+            reporte['tarjetas'] = session.query(Tarjeta).count()
+            reporte['secretos'] = session.query(Secreto).count()
+            reporte['inseguras'] = inseguras
+            reporte['avencer'] = avencer
+            reporte['masdeuna'] = masdeuna
+            reporte['nivel'] = sc * 0.5 + v * 0.2 + r * 0.3
 
-        # SC: El procentaje de claves que son seguras en la lista de claves
-        # SC = (total_claves - claves_inseguras) / total_claves
-        sc = (len(listaClaves) - inseguras) / len(listaClaves)
-        v = avencer / (len(session.query(Tarjeta).all()) + len(session.query(Identificacion).all()))
-        
-        r = 1
-        tieneMasDeUno = False
-        i = 0
-        while not tieneMasDeUno and i < len(listaClaves):
-            if len(listaClaves[i].elementos) > 1:
-                if len(listaClaves[i].elementos) > 3:
-                    r = 0
-                tieneMasDeUno = True
-            i += 1
-
-        return {'logins': session.query(Login).count(),
-                'ids': session.query(Identificacion).count(),
-                'tarjetas': session.query(Tarjeta).count(),
-                'secretos': session.query(Secreto).count(),
-                'inseguras': inseguras,
-                'avencer': avencer,
-                'masdeuna': masdeuna,
-                'nivel': sc * 0.5 + v * 0.2 + r * 0.3}
+        return reporte
