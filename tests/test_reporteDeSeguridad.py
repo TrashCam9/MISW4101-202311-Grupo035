@@ -17,8 +17,7 @@ class ReporteDeSeguridadTestCase(unittest.TestCase):
     clave: "Clave"
 
     def setUp(self) -> None:
-        self.fachada = FachadaCajaDeSeguridad()    
-        self.session = session   
+        self.fachada = FachadaCajaDeSeguridad()     
         self.data_factory = testing_utils.data_factory
 
         if len(session.query(Clave).all()) == 0:
