@@ -132,15 +132,14 @@ class ReporteDeSeguridadTestCase(unittest.TestCase):
         porcentajeNoVencidas /= (len(self.listaIds) + len(self.listaTarjetas))
 
         porcentajeR = 1
-        for clave in self.listaClaves:
-            if len(clave.elementos) > 3:
-                porcentajeR = 0
-                break
-            elif len(clave.elementos) > 1:
-                porcentajeR = 0.5
-                break
-        if porcentajeR != 0:
-            porcentajeR = 1
+        tieneMasDeUno = False
+        i = 0
+        while not tieneMasDeUno and i < len(self.listaClaves):
+            if len(self.listaClaves[i].elementos) > 1:
+                if len(self.listaClaves[i].elementos) > 3:
+                    porcentajeR = 0
+                tieneMasDeUno = True
+            i += 1
 
         nivel = porcentajeSeguras * 0.5 + porcentajeNoVencidas * 0.2 + porcentajeR * 0.3
 

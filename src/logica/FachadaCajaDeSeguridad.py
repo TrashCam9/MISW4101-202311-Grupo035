@@ -352,8 +352,8 @@ class FachadaCajaDeSeguridad:
         '''
         listaClaves = session.query(Clave).all()
 
-        # Calcular claves inseguras
         inseguras = 0
+        masdeuna = 0
         for clave in listaClaves:
             if not (any(c.islower() for c in clave.clave) and 
                     any(c.isupper() for c in clave.clave) and 
@@ -361,6 +361,8 @@ class FachadaCajaDeSeguridad:
                     any(c in "?-*!@#$()/{}=.,;:" for c in clave.clave) and 
                     ' ' not in clave.clave):
                 inseguras += 1
+            if len(clave.elementos) > 1:
+                masdeuna += 1
 
         # Calcular elementos a vencer
         avencer = 0
@@ -371,24 +373,20 @@ class FachadaCajaDeSeguridad:
             if identificacion.fechaVencimiento < date.today() + timedelta(days=30):
                 avencer += 1
 
-        masdeuna = 0
-        for clave in listaClaves:
-            if len(clave.elementos) > 1:
-                masdeuna += 1
-
         # SC: El procentaje de claves que son seguras en la lista de claves
-
         # SC = (total_claves - claves_inseguras) / total_claves
         sc = (len(listaClaves) - inseguras) / len(listaClaves)
         v = avencer / (len(session.query(Tarjeta).all()) + len(session.query(Identificacion).all()))
+        
         r = 1
-        for clave in listaClaves:
-            if len(clave.elementos) > 3:
-                r = 0
-                break
-            elif len(clave.elementos) > 1:
-                r = 0.5
-                break
+        tieneMasDeUno = False
+        i = 0
+        while not tieneMasDeUno and i < len(listaClaves):
+            if len(listaClaves[i].elementos) > 1:
+                if len(listaClaves[i].elementos) > 3:
+                    r = 0
+                tieneMasDeUno = True
+            i += 1
 
         return {'logins': session.query(Login).count(),
                 'ids': session.query(Identificacion).count(),
