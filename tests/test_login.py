@@ -16,19 +16,17 @@ class LoginTestCase(unittest.TestCase):
         self.data_factory = testing_utils.data_factory
         self.database_seeded = False
 
-        self.clave = Clave(nombre = testing_utils.give_unique_word(),
-                          clave = self.data_factory.password(),
-                          pista = self.data_factory.sentence())
-        session.add(self.clave)
-        session.commit()
+        if session.query(Clave).count() == 0:
+            self.clave = testing_utils.crear_clave()
+        else:
+            self.clave = session.query(Clave).first()
 
         if session.query(Login).count() == 0:
-            
             for _ in range(5):
                 login = Login(tipo = "login",
                               nombre = self.data_factory.word(),
                               nota = self.data_factory.sentence(),
-                              clave = self.clave.id,
+                              clave = self.clave.nombre,
                               usuario = self.data_factory.user_name(),
                               email = self.data_factory.email(),
                               url = self.data_factory.url())

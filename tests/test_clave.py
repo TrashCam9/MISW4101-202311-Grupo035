@@ -17,13 +17,7 @@ class ClaveTestCase(unittest.TestCase):
         # Crear 5 claves para las pruebas si no hay ninguna en la base de datos
         if session.query(Clave).count() == 0:
             for _ in range(5):
-                clave = Clave(
-                    nombre=testing_utils.give_unique_word(),
-                    clave=self.data_factory.password(),
-                    pista=self.data_factory.sentence(),
-                )
-                session.add(clave)
-            session.commit()
+                testing_utils.crear_clave()
             self.database_seeded = True
         self.clavesList = session.query(Clave).all()
 

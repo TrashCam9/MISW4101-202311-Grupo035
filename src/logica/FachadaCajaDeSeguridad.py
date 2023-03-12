@@ -1,7 +1,8 @@
 '''
 Esta clase es la fachada con los métodos a implementar en la lógica
 '''
-from src.modelo.elemento import Elemento, Login
+from datetime import date, timedelta
+from src.modelo.elemento import Elemento, Identificacion, Login, Secreto, Tarjeta
 from src.modelo.clave import Clave
 from src.modelo.caja_de_seguridad import CajaDeSeguridad
 from src.modelo.declarative_base import engine, Base, session
@@ -349,4 +350,49 @@ class FachadaCajaDeSeguridad:
             (dict): Un mapa con los valores numéricos para las llaves logins, ids, tarjetas,
             secretos, inseguras, avencer, masdeuna y nivel que conforman el reporte
         '''
-        return NotImplementedError("Método no implementado")
+        listaClaves = session.query(Clave).all()
+
+        inseguras = 0
+        masdeuna = 0
+        for clave in listaClaves:
+            if not (any(c.islower() for c in clave.clave) and 
+                    any(c.isupper() for c in clave.clave) and 
+                    any(c.isdigit() for c in clave.clave) and 
+                    any(c in "?-*!@#$()/{}=.,;:" for c in clave.clave) and 
+                    ' ' not in clave.clave):
+                inseguras += 1
+            if len(clave.elementos) > 1:
+                masdeuna += 1
+
+        # Calcular elementos a vencer
+        avencer = 0
+        for tarjeta in session.query(Tarjeta).all():
+            if tarjeta.fecha_vencimiento < date.today() + timedelta(days=30):
+                avencer += 1
+        for identificacion in session.query(Identificacion).all():
+            if identificacion.fechaVencimiento < date.today() + timedelta(days=30):
+                avencer += 1
+
+        # SC: El procentaje de claves que son seguras en la lista de claves
+        # SC = (total_claves - claves_inseguras) / total_claves
+        sc = (len(listaClaves) - inseguras) / len(listaClaves)
+        v = avencer / (len(session.query(Tarjeta).all()) + len(session.query(Identificacion).all()))
+        
+        r = 1
+        tieneMasDeUno = False
+        i = 0
+        while not tieneMasDeUno and i < len(listaClaves):
+            if len(listaClaves[i].elementos) > 1:
+                if len(listaClaves[i].elementos) > 3:
+                    r = 0
+                tieneMasDeUno = True
+            i += 1
+
+        return {'logins': session.query(Login).count(),
+                'ids': session.query(Identificacion).count(),
+                'tarjetas': session.query(Tarjeta).count(),
+                'secretos': session.query(Secreto).count(),
+                'inseguras': inseguras,
+                'avencer': avencer,
+                'masdeuna': masdeuna,
+                'nivel': sc * 0.5 + v * 0.2 + r * 0.3}
