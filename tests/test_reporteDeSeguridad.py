@@ -11,6 +11,7 @@ from tests import testing_utils
 
 class ReporteDeSeguridadTestCase(unittest.TestCase):
     listaLogins: "list[Login]" = []
+    listaClaves: "list[Clave]" = []
     listaIds: "list[Identificacion]" = []
     listaTarjetas: "list[Tarjeta]" = []
     listaSecretos: "list[Secreto]" = []
@@ -40,6 +41,8 @@ class ReporteDeSeguridadTestCase(unittest.TestCase):
         if len(session.query(Secreto).all()) == 0:
             testing_utils.crear_5_secretos_aleatorios(self.clave)
         self.listaSecretos = session.query(Secreto).all()
+
+        self.listaClaves = session.query(Clave).all()
     
     def test_retorna_diccionario(self):
         reporte = self.fachada.dar_reporte_seguridad()
@@ -73,15 +76,16 @@ class ReporteDeSeguridadTestCase(unittest.TestCase):
 
     def test_num_inseguras(self):
         # Crear 3 claves seguras y 2 inseguras si hay menos de 5 claves
-        if session.query(Clave).count() < 5:
+        if len(self.listaClaves) < 5:
             for _ in range(3):
-                testing_utils.crear_clave(segura=True)
+                clave = testing_utils.crear_clave(segura=True)
+                self.listaClaves.append(clave)
             for _ in range(2):
-                testing_utils.crear_clave(segura=False)
+                clave = testing_utils.crear_clave(segura=False)
+                self.listaClaves.append(clave)
 
-        listaClaves = session.query(Clave).all()
         inseguras = 0
-        for clave in listaClaves:
+        for clave in self.listaClaves:
             if not testing_utils.verificar_clave_segura(str(clave.clave)):
                 inseguras += 1
 
@@ -103,9 +107,8 @@ class ReporteDeSeguridadTestCase(unittest.TestCase):
         self.assertEqual(reporte['avencer'], avencer)
 
     def test_clave_mas_de_un_elemento(self):
-        listaClaves = session.query(Clave).all()
         masdeuna = 0
-        for clave in listaClaves:
+        for clave in self.listaClaves:
             if len(clave.elementos) > 1:
                 masdeuna += 1
 
@@ -114,26 +117,22 @@ class ReporteDeSeguridadTestCase(unittest.TestCase):
         self.assertEqual(reporte['masdeuna'], masdeuna)
 
     def test_nivel_seguridad(self):
-        listaClaves = session.query(Clave).all()
         seguras = 0
-        for clave in listaClaves:
+        for clave in self.listaClaves:
             if testing_utils.verificar_clave_segura(str(clave.clave)):
                 seguras += 1
-        porcentajeSeguras = seguras / len(listaClaves)
-
-        listaIds = session.query(Identificacion).all()
-        listaTarjetas = session.query(Tarjeta).all()
+        porcentajeSeguras = seguras / len(self.listaClaves)
         porcentajeNoVencidas = 0
-        for identificacion in listaIds:
+        for identificacion in self.listaIds:
             if testing_utils.verificar_vencimiento_3_meses(identificacion.fechaVencimiento):
                 porcentajeNoVencidas += 1
-        for tarjeta in listaTarjetas:
+        for tarjeta in self.listaTarjetas:
             if testing_utils.verificar_vencimiento_3_meses(tarjeta.fecha_vencimiento):
                 porcentajeNoVencidas += 1
-        porcentajeNoVencidas /= (len(listaIds) + len(listaTarjetas))
+        porcentajeNoVencidas /= (len(self.listaIds) + len(self.listaTarjetas))
 
         porcentajeR = 1
-        for clave in listaClaves:
+        for clave in self.listaClaves:
             if len(clave.elementos) > 3:
                 porcentajeR = 0
                 break
