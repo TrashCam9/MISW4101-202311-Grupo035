@@ -21,7 +21,7 @@ class ReporteDeSeguridadTestCase(unittest.TestCase):
         self.session = session   
         self.data_factory = testing_utils.data_factory
 
-        if session.query(Clave).count == 0:
+        if len(session.query(Clave).all()) == 0:
             self.clave = testing_utils.crear_clave()
         else:
             self.clave = session.query(Clave).first()
