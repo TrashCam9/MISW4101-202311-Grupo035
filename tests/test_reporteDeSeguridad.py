@@ -10,7 +10,7 @@ from src.logica.FachadaCajaDeSeguridad import FachadaCajaDeSeguridad
 from tests import testing_utils
 
 class ReporteDeSeguridadTestCase(unittest.TestCase):
-    listaLogins: "list[Clave]" = []
+    listaLogins: "list[Login]" = []
     listaIds: "list[Identificacion]" = []
     listaTarjetas: "list[Tarjeta]" = []
     listaSecretos: "list[Secreto]" = []
