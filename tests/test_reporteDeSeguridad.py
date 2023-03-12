@@ -41,8 +41,6 @@ class ReporteDeSeguridadTestCase(unittest.TestCase):
         if session.query(Secreto).count() == 0:
             testing_utils.crear_5_secretos_aleatorios(self.clave)
         self.listaSecretos = session.query(Secreto).all()
-
-        return super().setUp()
     
     def test_retorna_diccionario(self):
         reporte = self.fachada.dar_reporte_seguridad()
