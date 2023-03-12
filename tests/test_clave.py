@@ -1,25 +1,24 @@
 import unittest
 
-from faker import Faker
-
 from src.logica.FachadaCajaDeSeguridad import FachadaCajaDeSeguridad
 from src.modelo.clave import Clave
 from src.modelo.declarative_base import session
 
+from tests import testing_utils
 
 class ClaveTestCase(unittest.TestCase):
     clavesList: "list[Clave]"
 
     def setUp(self) -> None:
         self.fachada = FachadaCajaDeSeguridad()
-        self.data_factory = Faker()
+        self.data_factory = testing_utils.data_factory
         self.database_seeded = False
 
         # Crear 5 claves para las pruebas si no hay ninguna en la base de datos
         if session.query(Clave).count() == 0:
             for _ in range(5):
                 clave = Clave(
-                    nombre=self.data_factory.word(),
+                    nombre=testing_utils.give_unique_word(),
                     clave=self.data_factory.password(),
                     pista=self.data_factory.sentence(),
                 )
@@ -32,7 +31,7 @@ class ClaveTestCase(unittest.TestCase):
         self.assertRaises(TypeError, self.fachada.crear_clave, 123, 123, 123)
 
     def test_crear_clave(self):
-        nombre_clave = self.data_factory.word()
+        nombre_clave = testing_utils.give_unique_word()
         self.fachada.crear_clave(
             nombre=nombre_clave,
             clave=self.data_factory.password(),

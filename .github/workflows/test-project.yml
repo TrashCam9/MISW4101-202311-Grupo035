@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop, 'feature/**' ]
+  pull_request:
+    types: [ review_requested, ready_for_review ]
+    branches: [ develop ]
+
+jobs:
+  run_tests:
+    name: run_tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout setup
+        uses: actions/checkout@v3
+      - name: Python setup
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - name: Instalación de librerías y dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Correr pruebas
+        id: correr-pruebas
+        run: python -m unittest -v
+
+  create_release_branch:
+    if: ${{ github.ref == 'refs/heads/develop' && contains(github.event.head_commit.message, 'Release') }}
+    name: create_release_branch
+    needs: run_tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout setup
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Crear rama release
+        run: |
+          git checkout -b release
+          git push -f -u origin release
+
+  run_coverage:
+    name: run_coverage
+    needs: run_tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout setup
+        uses: actions/checkout@v3
+      - name: Python setup
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - name: Instalación de librerías y dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Cálculo de cubrimiento
+        run: |
+          coverage run -m unittest -v
+          coverage report -m
+
+  make_release:
+    name: make_release
+    needs: create_release_branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout setup
+        uses: actions/checkout@v3
+      - name: Mezcla rama1 -> rama2
+        uses: tukasz/direct-merge-action@master
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          source-branch: release
+          target-branch: main
