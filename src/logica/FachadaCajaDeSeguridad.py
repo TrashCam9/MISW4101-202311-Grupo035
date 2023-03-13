@@ -1,7 +1,8 @@
 '''
 Esta clase es la fachada con los métodos a implementar en la lógica
 '''
-from src.modelo.elemento import Elemento, Login
+from datetime import date, timedelta
+from src.modelo.elemento import Elemento, ElementoConClave, Identificacion, Login, Secreto, Tarjeta
 from src.modelo.clave import Clave
 from src.modelo.caja_de_seguridad import CajaDeSeguridad
 from src.modelo.declarative_base import engine, Base, session
@@ -68,9 +69,13 @@ class FachadaCajaDeSeguridad:
     def eliminar_elemento(self, id):
         ''' Elimina un elemento de la lista de elementos
         Parámetros:
-            id (int): El id del elemento a eliminar_clave
+            id (int): El id del elemento a eliminar
         '''
-        raise NotImplementedError("Método no implementado")
+        elemento = session.query(Elemento).filter_by(id=id).first()
+        if elemento is None:
+            raise ValueError("El elemento no existe")
+
+        session.delete(elemento)
 
     def dar_claveMaestra(self):
         ''' Retorna la clave maestra de la caja de seguridad
@@ -89,15 +94,7 @@ class FachadaCajaDeSeguridad:
             url (string): El URL del login
             notas (string): Las notas del elemento
         '''
-        nombre_correcto = self.validar_parametro_string(nombre)
-        email_correcto = self.validar_parametro_string(email)
-        usuario_correcto = self.validar_parametro_string(usuario)
-        password_correcto = self.validar_parametro_string(password)
-        url_correcto = self.validar_parametro_string(url)
-        notas_correcto = self.validar_parametro_string(notas)
-
-        if not (nombre_correcto and email_correcto and usuario_correcto and password_correcto and url_correcto and notas_correcto):
-            raise TypeError("Los parámetros no son del tipo correcto")
+        self.validar_crear_editar_login(None, nombre, email, usuario, password, url, notas)
         
         if session.query(Clave).filter_by(nombre=password).first() is None:
             raise ValueError("El nombre de clave favorita no existe")
@@ -128,11 +125,19 @@ class FachadaCajaDeSeguridad:
             (string): El mensaje de error generado al presentarse errores en la 
             validación o una cadena de caracteres vacía si no hay errores.
         '''
-        raise NotImplementedError("Método no implementado")
+        nombre_correcto = self.validar_parametro_string(nombre)
+        email_correcto = self.validar_parametro_string(email)
+        usuario_correcto = self.validar_parametro_string(usuario)
+        password_correcto = self.validar_parametro_string(password)
+        url_correcto = self.validar_parametro_string(url)
+        notas_correcto = self.validar_parametro_string(notas)
+        if not (nombre_correcto and email_correcto and usuario_correcto and password_correcto and url_correcto and notas_correcto) or type(id) == str:
+                raise TypeError("Los parámetros no son del tipo correcto")
 
     def editar_login(self, id, nombre, email, usuario, password, url, notas):
         ''' Edita un elemento login
         Parámetros:
+            id (int): El id del elemento a editar
             nombre (string): El nombre del elemento
             email (string): El email del elemento
             usuario (string): El usuario del login
@@ -140,20 +145,48 @@ class FachadaCajaDeSeguridad:
             url (string): El URL del login
             notas (string): Las notas del elemento
         '''
-        raise NotImplementedError("Método no implementado")
+        self.validar_crear_editar_login(id, nombre, email, usuario, password, url, notas)
+
+        # Verificar que el id exista
+        login = session.query(Login).filter_by(id=id).first()
+        if login is None:
+            raise ValueError("El id no existe")
+        
+        # Verificar que la clave favorita exista
+        if session.query(Clave).filter_by(nombre=password).first() is None:
+            raise ValueError("El nombre de clave favorita no existe")
+
+        # Editar el login
+        login.nombre = nombre
+        login.email = email
+        login.usuario = usuario
+        login.clave = password
+        login.url = url
+        login.nota = notas
+        session.commit()
 
     def crear_id(self, nombre_elemento, numero, nombre_completo, fnacimiento, fexpedicion, fvencimiento, notas):
         ''' Crea un elemento identificación
         Parámetros:
             nombre_elemento (string): El nombre del elemento
-            numero (string): El número del elemento
+            numero (integer): El número del elemento
             nombre_completo (string): El nombre completo de la persona en la identificación
             fnacimiento (string): La fecha de nacimiento de la persona en la identificación
             fexpedicion (string): La fecha de expedición en la identificación
             fvencimiento (string): La feha de vencimiento en la identificación
             notas (string): Las notas del elemento
         '''
-        raise NotImplementedError("Método no implementado")
+        self.validar_crear_editar_id(None, nombre_elemento, numero, nombre_completo, fnacimiento, fexpedicion, fvencimiento, notas)
+        identificacion = Identificacion(tipo = "Identificacion",
+                                        nombre = nombre_elemento,
+                                        nota = notas,
+                                        numero = numero,
+                                        nombreCompleto = nombre_completo,
+                                        fechaNacimiento = fnacimiento,
+                                        fechaExpedicion = fexpedicion,
+                                        fechaVencimiento = fvencimiento)
+        session.add(identificacion)
+        session.commit()
 
     def validar_crear_editar_id(self, id, nombre_elemento, numero, nombre_completo, fnacimiento, fexpedicion, fvencimiento, notas):
         ''' Valida que una identificación se pueda crear o editar
@@ -169,7 +202,21 @@ class FachadaCajaDeSeguridad:
             (string): El mensaje de error generado al presentarse errores en la 
             validación o una cadena de caracteres vacía si no hay errores.
         '''
-        raise NotImplementedError("Método no implementado")
+        if not isinstance(nombre_elemento, str) or not isinstance(numero, int) or not isinstance(nombre_completo, str) or not isinstance(fnacimiento, date) or not isinstance(fexpedicion, date) or not isinstance(fvencimiento, date) or not isinstance (notas, str) or (id != None and not type(id) == int):
+            raise TypeError("Los parámetros no son del tipo correcto")
+        if len(nombre_elemento) < 3 or len(nombre_completo) < 3 or len(notas) < 3:
+            raise ValueError("Los parámetros no cumplen con la longitud mínima")
+        if len(nombre_elemento) > 255 or len(nombre_completo) > 255 or len(notas) > 512:
+            raise ValueError("Los parámetros no cumplen con la longitud máxima")
+        if (identificacion:=session.query(Identificacion).filter_by(nombre=nombre_elemento).first()) is not None:
+            if id == None:
+                raise ValueError("El nombre de la identificación ya existe")
+            else:
+                if identificacion.id != id:
+                    raise ValueError("El nombre de la identificación ya existe")
+        if id != None:
+            if session.query(Identificacion).filter_by(id=id).first() is None:
+                raise ValueError("La identificación no existe")
 
     def editar_id(self, id,nombre_elemento, numero, nombre_completo, fnacimiento, fexpedicion, fvencimiento, notas):
         ''' Edita un elemento identificación
@@ -182,7 +229,18 @@ class FachadaCajaDeSeguridad:
             fvencimiento (string): La feha de vencimiento en la identificación
             notas (string): Las notas del elemento
         '''
-        raise NotImplementedError("Método no implementado")
+        self.validar_crear_editar_id(id, nombre_elemento, numero, nombre_completo, fnacimiento, fexpedicion, fvencimiento, notas)
+        identificacion = session.query(Identificacion).filter_by(id=id).first()
+        identificacion.nombre = nombre_elemento
+        identificacion.nota = notas
+        identificacion.numero = numero
+        identificacion.nombreCompleto = nombre_completo
+        identificacion.fechaNacimiento = fnacimiento
+        identificacion.fechaExpedicion = fexpedicion
+        identificacion.fechaVencimiento = fvencimiento
+        session.commit()
+
+
 
     def crear_tarjeta(self, nombre_elemento, numero, titular, fvencimiento, ccv, clave, direccion, telefono, notas):
         ''' Crea un elemento tarjeta
@@ -341,12 +399,77 @@ class FachadaCajaDeSeguridad:
         Parámetros:
             id (int): El id de la clave favorita a borrar
         '''
-        raise NotImplementedError("Método no implementado")
-
+        clave = session.query(Clave).filter(Clave.id == id).first()
+        if clave == None:
+            raise ValueError("No existe una clave favorita con ese id")
+        if session.query(ElementoConClave).filter(ElementoConClave.clave == clave.nombre).count() > 0:
+            raise ValueError("No se puede eliminar la clave favorita porque está asociada a un elemento")
+        session.delete(clave)
+        session.commit()
+        
     def dar_reporte_seguridad(self):
         ''' Genera la información para el reporte de seguridad
         Retorna:
             (dict): Un mapa con los valores numéricos para las llaves logins, ids, tarjetas,
             secretos, inseguras, avencer, masdeuna y nivel que conforman el reporte
         '''
-        return NotImplementedError("Método no implementado")
+        reporte = {
+            'logins': 0,
+            'ids': 0,
+            'tarjetas': 0,
+            'secretos': 0,
+            'inseguras': 0,
+            'avencer': 0,
+            'masdeuna': 0,
+            'nivel': 0
+        }
+        listaClaves = session.query(Clave).all()
+        if len(listaClaves) != 0:
+            inseguras = 0
+            masdeuna = 0
+            for clave in listaClaves:
+                if not (any(c.islower() for c in clave.clave) and 
+                        any(c.isupper() for c in clave.clave) and 
+                        any(c.isdigit() for c in clave.clave) and 
+                        any(c in "?-*!@#$()/{}=.,;:" for c in clave.clave) and 
+                        ' ' not in clave.clave):
+                    inseguras += 1
+                if len(clave.elementos) > 1:
+                    masdeuna += 1
+
+            # SC: El procentaje de claves que son seguras en la lista de claves
+            # SC = (total_claves - claves_inseguras) / total_claves
+            sc = (len(listaClaves) - inseguras) / len(listaClaves)
+
+            # Calcular elementos a vencer
+            v = 0
+            avencer = 0
+            if len(session.query(Tarjeta).all()) + len(session.query(Identificacion).all()) != 0:
+                
+                for tarjeta in session.query(Tarjeta).all():
+                    if tarjeta.fecha_vencimiento < date.today() + timedelta(days=30):
+                        avencer += 1
+                for identificacion in session.query(Identificacion).all():
+                    if identificacion.fechaVencimiento < date.today() + timedelta(days=30):
+                        avencer += 1
+                v = avencer / (len(session.query(Tarjeta).all()) + len(session.query(Identificacion).all()))
+            
+            r = 1
+            tieneMasDeUno = False
+            i = 0
+            while not tieneMasDeUno and i < len(listaClaves):
+                if len(listaClaves[i].elementos) > 1:
+                    if len(listaClaves[i].elementos) > 3:
+                        r = 0
+                    tieneMasDeUno = True
+                i += 1
+            reporte['logins'] = session.query(Login).count()
+            reporte['ids'] = session.query(Identificacion).count()
+            reporte['tarjetas'] = session.query(Tarjeta).count()
+            reporte['secretos'] = session.query(Secreto).count()
+            reporte['inseguras'] = inseguras
+            reporte['avencer'] = avencer
+            reporte['masdeuna'] = masdeuna
+            reporte['nivel'] = sc * 0.5 + v * 0.2 + r * 0.3
+
+        return reporte

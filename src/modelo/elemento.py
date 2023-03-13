@@ -17,7 +17,7 @@ class ElementoConClave(Elemento):
 
     __tablename__ = 'elementos_con_clave'
     id = Column(Integer, ForeignKey('elementos.id'), primary_key=True)
-    clave = Column(Integer, ForeignKey('claves.id'))
+    clave = Column(String, ForeignKey('claves.nombre'))
 
 
 class Identificacion(Elemento):

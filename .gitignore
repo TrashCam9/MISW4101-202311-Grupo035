@@ -50,4 +50,3 @@ MANIFEST
 venv/
 .venv*/
 .vscode/
-database.db
