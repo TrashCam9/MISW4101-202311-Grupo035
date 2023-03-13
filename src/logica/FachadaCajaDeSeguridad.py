@@ -180,15 +180,21 @@ class FachadaCajaDeSeguridad:
             (string): El mensaje de error generado al presentarse errores en la 
             validación o una cadena de caracteres vacía si no hay errores.
         '''
-        if not isinstance(nombre_elemento, str) or not isinstance(numero, int) or not isinstance(nombre_completo, str) or not isinstance(fnacimiento, date) or not isinstance(fexpedicion, date) or not isinstance(fvencimiento, date) or not isinstance (notas, str):
+        if not isinstance(nombre_elemento, str) or not isinstance(numero, int) or not isinstance(nombre_completo, str) or not isinstance(fnacimiento, date) or not isinstance(fexpedicion, date) or not isinstance(fvencimiento, date) or not isinstance (notas, str) or (id != None and not type(id) == int):
             raise TypeError("Los parámetros no son del tipo correcto")
         if len(nombre_elemento) < 3 or len(nombre_completo) < 3 or len(notas) < 3:
             raise ValueError("Los parámetros no cumplen con la longitud mínima")
         if len(nombre_elemento) > 255 or len(nombre_completo) > 255 or len(notas) > 512:
             raise ValueError("Los parámetros no cumplen con la longitud máxima")
-        if session.query(Identificacion).filter_by(nombre=nombre_elemento).first() is not None:
+        if (identificacion:=session.query(Identificacion).filter_by(nombre=nombre_elemento).first()) is not None:
             if id == None:
                 raise ValueError("El nombre de la identificación ya existe")
+            else:
+                if identificacion.id != id:
+                    raise ValueError("El nombre de la identificación ya existe")
+        if id != None:
+            if session.query(Identificacion).filter_by(id=id).first() is None:
+                raise ValueError("La identificación no existe")
 
     def editar_id(self, id,nombre_elemento, numero, nombre_completo, fnacimiento, fexpedicion, fvencimiento, notas):
         ''' Edita un elemento identificación
@@ -201,7 +207,18 @@ class FachadaCajaDeSeguridad:
             fvencimiento (string): La feha de vencimiento en la identificación
             notas (string): Las notas del elemento
         '''
-        raise NotImplementedError("Método no implementado")
+        self.validar_crear_editar_id(id, nombre_elemento, numero, nombre_completo, fnacimiento, fexpedicion, fvencimiento, notas)
+        identificacion = session.query(Identificacion).filter_by(id=id).first()
+        identificacion.nombre = nombre_elemento
+        identificacion.nota = notas
+        identificacion.numero = numero
+        identificacion.nombreCompleto = nombre_completo
+        identificacion.fechaNacimiento = fnacimiento
+        identificacion.fechaExpedicion = fexpedicion
+        identificacion.fechaVencimiento = fvencimiento
+        session.commit()
+
+
 
     def crear_tarjeta(self, nombre_elemento, numero, titular, fvencimiento, ccv, clave, direccion, telefono, notas):
         ''' Crea un elemento tarjeta

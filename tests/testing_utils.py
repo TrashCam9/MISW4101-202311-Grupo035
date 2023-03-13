@@ -16,6 +16,12 @@ def give_unique_word(obj):
         word = data_factory.unique.word()
     return word
 
+def give_unique_word_of_length(obj, n):
+    word = generate_word_of_length(n)
+    while session.query(obj).filter(obj.nombre == word).count() > 0:
+        word = generate_word_of_length(n)
+    return word
+
 def generate_word_of_length(n):
     return ''.join(random.choices(string.ascii_letters, k=n))
 
