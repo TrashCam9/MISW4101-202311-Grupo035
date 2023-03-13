@@ -90,15 +90,7 @@ class FachadaCajaDeSeguridad:
             url (string): El URL del login
             notas (string): Las notas del elemento
         '''
-        nombre_correcto = self.validar_parametro_string(nombre)
-        email_correcto = self.validar_parametro_string(email)
-        usuario_correcto = self.validar_parametro_string(usuario)
-        password_correcto = self.validar_parametro_string(password)
-        url_correcto = self.validar_parametro_string(url)
-        notas_correcto = self.validar_parametro_string(notas)
-
-        if not (nombre_correcto and email_correcto and usuario_correcto and password_correcto and url_correcto and notas_correcto):
-            raise TypeError("Los parámetros no son del tipo correcto")
+        self.validar_crear_editar_login(None, nombre, email, usuario, password, url, notas)
         
         if session.query(Clave).filter_by(nombre=password).first() is None:
             raise ValueError("El nombre de clave favorita no existe")
@@ -129,11 +121,19 @@ class FachadaCajaDeSeguridad:
             (string): El mensaje de error generado al presentarse errores en la 
             validación o una cadena de caracteres vacía si no hay errores.
         '''
-        raise NotImplementedError("Método no implementado")
+        nombre_correcto = self.validar_parametro_string(nombre)
+        email_correcto = self.validar_parametro_string(email)
+        usuario_correcto = self.validar_parametro_string(usuario)
+        password_correcto = self.validar_parametro_string(password)
+        url_correcto = self.validar_parametro_string(url)
+        notas_correcto = self.validar_parametro_string(notas)
+        if not (nombre_correcto and email_correcto and usuario_correcto and password_correcto and url_correcto and notas_correcto) or type(id) == str:
+                raise TypeError("Los parámetros no son del tipo correcto")
 
     def editar_login(self, id, nombre, email, usuario, password, url, notas):
         ''' Edita un elemento login
         Parámetros:
+            id (int): El id del elemento a editar
             nombre (string): El nombre del elemento
             email (string): El email del elemento
             usuario (string): El usuario del login
@@ -141,7 +141,25 @@ class FachadaCajaDeSeguridad:
             url (string): El URL del login
             notas (string): Las notas del elemento
         '''
-        raise NotImplementedError("Método no implementado")
+        self.validar_crear_editar_login(id, nombre, email, usuario, password, url, notas)
+
+        # Verificar que el id exista
+        login = session.query(Login).filter_by(id=id).first()
+        if login is None:
+            raise ValueError("El id no existe")
+        
+        # Verificar que la clave favorita exista
+        if session.query(Clave).filter_by(nombre=password).first() is None:
+            raise ValueError("El nombre de clave favorita no existe")
+
+        # Editar el login
+        login.nombre = nombre
+        login.email = email
+        login.usuario = usuario
+        login.clave = password
+        login.url = url
+        login.nota = notas
+        session.commit()
 
     def crear_id(self, nombre_elemento, numero, nombre_completo, fnacimiento, fexpedicion, fvencimiento, notas):
         ''' Crea un elemento identificación

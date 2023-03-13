@@ -7,10 +7,11 @@ from src.modelo.declarative_base import session
 
 from tests import testing_utils
 
+
 class LoginTestCase(unittest.TestCase):
     loginsList: "list[Login]"
     clave: "Clave"
- 
+
     def setUp(self):
         self.fachada = FachadaCajaDeSeguridad()
         self.data_factory = testing_utils.data_factory
@@ -66,3 +67,82 @@ class LoginTestCase(unittest.TestCase):
         ]
         for params in test_cases:
             self.assertRaises(TypeError, self.fachada.crear_login, *params)
+
+    def test_editar_login_con_parametros_incorrectos(self):
+        test_cases = [
+            ("0", self.data_factory.domain_word(), self.data_factory.email(), self.data_factory.user_name(), self.clave.nombre, self.data_factory.url(), self.data_factory.sentence()),
+            (1, 1, self.data_factory.email(), self.data_factory.user_name(), self.clave.nombre, self.data_factory.url(), self.data_factory.sentence()),
+            (1, self.data_factory.domain_word(), 1, self.data_factory.user_name(), self.clave.nombre, self.data_factory.url(), self.data_factory.sentence()),
+            (1, self.data_factory.domain_word(), self.data_factory.email(), 1, self.clave.nombre, self.data_factory.url(), self.data_factory.sentence()),
+            (1, self.data_factory.domain_word(), self.data_factory.email(), self.data_factory.user_name(), 1, self.data_factory.url(), self.data_factory.sentence()),
+            (1, self.data_factory.domain_word(), self.data_factory.email(), self.data_factory.user_name(), self.clave.nombre, 1, self.data_factory.sentence()),
+            (1, self.data_factory.domain_word(), self.data_factory.email(), self.data_factory.user_name(), self.clave.nombre, self.data_factory.url(), 1)
+        ]
+        for params in test_cases:
+            self.assertRaises(TypeError, self.fachada.editar_login, *params)
+
+    def test_editar_login_inexistente(self):
+        self.assertRaises(ValueError, self.fachada.editar_login,
+                          0,
+                          self.data_factory.domain_word(),
+                          self.data_factory.email(),
+                          self.data_factory.user_name(),
+                          self.clave.nombre,
+                          self.data_factory.url(),
+                          self.data_factory.sentence())
+
+    def test_editar_parametros_login(self):
+        # Crear un login para editar y no modificar los datos existentes
+        login = Login(tipo="login",
+                      nombre="Login de prueba",
+                      nota="Nota de prueba",
+                      clave=self.clave.nombre,
+                      usuario=self.data_factory.user_name(),
+                      email=self.data_factory.email(),
+                      url=self.data_factory.url())
+        session.add(login)
+        session.commit()
+
+        # Editar el login
+        nuevo_nombre = self.data_factory.domain_word()
+        nuevo_email = self.data_factory.email()
+        nuevo_usuario = self.data_factory.user_name()
+        nueva_url = self.data_factory.url()
+        nueva_nota = self.data_factory.sentence()
+        self.fachada.editar_login(login.id,
+                                    nuevo_nombre,
+                                    nuevo_email,
+                                    nuevo_usuario,
+                                    self.clave.nombre,
+                                    nueva_url,
+                                    nueva_nota)
+        
+        # Verificar que los datos fueron modificados
+        login = session.query(Login).filter(Login.id == login.id).first()
+        self.assertEqual(login.nombre, nuevo_nombre)
+        self.assertEqual(login.email, nuevo_email)
+        self.assertEqual(login.usuario, nuevo_usuario)
+        self.assertEqual(login.url, nueva_url)
+        self.assertEqual(login.nota, nueva_nota)
+
+    def test_editar_clave_inexistente_login(self):
+        # Crear un login para editar y no modificar los datos existentes
+        login = Login(tipo="login",
+                      nombre="Login de prueba",
+                      nota="Nota de prueba",
+                      clave=self.clave.nombre,
+                      usuario=self.data_factory.user_name(),
+                      email=self.data_factory.email(),
+                      url=self.data_factory.url())
+        session.add(login)
+        session.commit()
+
+        # Editar el login
+        self.assertRaises(ValueError, self.fachada.editar_login,
+                          login.id,
+                          login.nombre,
+                          login.email,
+                          login.usuario,
+                          "Clave inexistente",
+                          login.url,
+                          login.nota)
