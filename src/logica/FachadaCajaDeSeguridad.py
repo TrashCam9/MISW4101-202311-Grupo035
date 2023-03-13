@@ -2,7 +2,7 @@
 Esta clase es la fachada con los métodos a implementar en la lógica
 '''
 from datetime import date, timedelta
-from src.modelo.elemento import Elemento, Identificacion, Login, Secreto, Tarjeta
+from src.modelo.elemento import Elemento, ElementoConClave, Identificacion, Login, Secreto, Tarjeta
 from src.modelo.clave import Clave
 from src.modelo.caja_de_seguridad import CajaDeSeguridad
 from src.modelo.declarative_base import engine, Base, session
@@ -377,8 +377,14 @@ class FachadaCajaDeSeguridad:
         Parámetros:
             id (int): El id de la clave favorita a borrar
         '''
-        raise NotImplementedError("Método no implementado")
-
+        clave = session.query(Clave).filter(Clave.id == id).first()
+        if clave == None:
+            raise ValueError("No existe una clave favorita con ese id")
+        if session.query(ElementoConClave).filter(ElementoConClave.clave == clave.nombre).count() > 0:
+            raise ValueError("No se puede eliminar la clave favorita porque está asociada a un elemento")
+        session.delete(clave)
+        session.commit()
+        
     def dar_reporte_seguridad(self):
         ''' Genera la información para el reporte de seguridad
         Retorna:

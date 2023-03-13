@@ -2,7 +2,7 @@ import random
 import string
 from faker import Faker
 from src.modelo.clave import Clave
-from src.modelo.elemento import Login, Identificacion, Secreto, Tarjeta
+from src.modelo.elemento import ElementoConClave, Login, Identificacion, Secreto, Tarjeta
 
 from datetime import date, timedelta
 
@@ -37,6 +37,14 @@ def crear_clave(segura: bool = False):
     session.commit()
     return clave
 
+def crear_elemento_con_clave(clave: Clave):
+    elemento = ElementoConClave(tipo = "elemento_prueba", 
+                                clave = clave.nombre,
+                                nombre = give_unique_word(ElementoConClave),
+                                nota = data_factory.sentence())
+    session.add(elemento)
+    session.commit()
+    return elemento
 
 def crear_5_logins_aleatorios(clave: Clave):
     for _ in range(5):

@@ -1,4 +1,5 @@
 import unittest
+from src.modelo.elemento import ElementoConClave
 
 from src.logica.FachadaCajaDeSeguridad import FachadaCajaDeSeguridad
 from src.modelo.clave import Clave
@@ -8,6 +9,7 @@ from tests import testing_utils
 
 class ClaveTestCase(unittest.TestCase):
     clavesList: "list[Clave]"
+    elementoConClave: "ElementoConClave"
 
     def setUp(self) -> None:
         self.fachada = FachadaCajaDeSeguridad()
@@ -20,6 +22,7 @@ class ClaveTestCase(unittest.TestCase):
                 testing_utils.crear_clave()
             self.database_seeded = True
         self.clavesList = session.query(Clave).all()
+        self.elementoConClave = testing_utils.crear_elemento_con_clave(self.clavesList[0])
 
     def test_crear_clave_errada(self):
         self.assertRaises(TypeError, self.fachada.crear_clave, 123, 123, 123)
@@ -102,6 +105,22 @@ class ClaveTestCase(unittest.TestCase):
         self.assertEqual(claveGuardada.clave, "12345678")
         self.assertEqual(claveGuardada.pista, "Mi pista favorita")
 
+    def test_eliminar_clave_favorita_asociada_a_un_elemento(self):
+        self.assertRaises(ValueError,
+                          self.fachada.eliminar_clave,
+                          self.clavesList[0].id)
+
+    def test_eliminar_una_clave_inexistente(self):
+        self.assertRaises(ValueError,
+                          self.fachada.eliminar_clave,
+                          0)
+    
+    def test_eliminar_clave(self):
+        clave = self.clavesList[1]
+        self.fachada.eliminar_clave(clave.id)
+        claveGuardada = session.query(Clave).filter(Clave.id == clave.id).first()
+        self.assertEqual(claveGuardada, None)
+        self.clavesList = [self.clavesList[0]] + self.clavesList[2:]
 
     def tearDown(self):
         # Eliminar las claves creadas en el setUp
