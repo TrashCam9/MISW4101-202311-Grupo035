@@ -26,7 +26,7 @@ class IdentificacionTestCase(unittest.TestCase):
                 session.add(identificacion)
             session.commit()
             self.database_seeded= True
-            self.identificacionesList = session.query(Identificacion).all()
+        self.identificacionesList = session.query(Identificacion).all()
 
     def test_crear_identificación_con_parametros_incorrectos(self):
         test_cases = [

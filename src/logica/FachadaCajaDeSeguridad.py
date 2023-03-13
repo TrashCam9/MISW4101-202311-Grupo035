@@ -69,9 +69,13 @@ class FachadaCajaDeSeguridad:
     def eliminar_elemento(self, id):
         ''' Elimina un elemento de la lista de elementos
         Parámetros:
-            id (int): El id del elemento a eliminar_clave
+            id (int): El id del elemento a eliminar
         '''
-        raise NotImplementedError("Método no implementado")
+        elemento = session.query(Elemento).filter_by(id=id).first()
+        if elemento is None:
+            raise ValueError("El elemento no existe")
+
+        session.delete(elemento)
 
     def dar_claveMaestra(self):
         ''' Retorna la clave maestra de la caja de seguridad
