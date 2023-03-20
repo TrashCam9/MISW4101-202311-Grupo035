@@ -118,13 +118,13 @@ class VistaLogin(QWidget):
     def mostrar_login(self, elemento):
         self.elemento=elemento
         if (self.elemento!=None):
-            self.texto_nombre.setText(self.elemento["nombre_elemento"])
+            self.texto_nombre.setText(self.elemento["nombre"])
             self.texto_email.setText(self.elemento["email"])
             self.texto_usuario.setText(self.elemento["usuario"])
             indice_clave = self.combobox_claves.findText(self.elemento["clave"])
             self.combobox_claves.setCurrentIndex(indice_clave)
             self.texto_url.setText(self.elemento["url"])
-            self.texto_notas.setText(str(self.elemento["notas"]))
+            self.texto_notas.setText(str(self.elemento["nota"]))
 
     def volver(self):
         """

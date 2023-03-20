@@ -30,20 +30,17 @@ class IdentificacionTestCase(unittest.TestCase):
 
     def test_crear_identificación_con_parametros_incorrectos(self):
         test_cases = [
-            (1, int(self.data_factory.credit_card_number()), self.data_factory.name(), self.data_factory.date_of_birth(minimum_age=35, maximum_age=99), self.data_factory.date_of_birth(minimum_age=24, maximum_age=35), self.data_factory.date_of_birth(minimum_age=0, maximum_age=24), self.data_factory.sentence()),
-            (testing_utils.give_unique_word(Identificacion), "?", self.data_factory.name(), self.data_factory.date_of_birth(minimum_age=35, maximum_age=99), self.data_factory.date_of_birth(minimum_age=24, maximum_age=35), self.data_factory.date_of_birth(minimum_age=0, maximum_age=24), self.data_factory.sentence()),
-            (testing_utils.give_unique_word(Identificacion), int(self.data_factory.credit_card_number()), 1, self.data_factory.date_of_birth(minimum_age=35, maximum_age=99), self.data_factory.date_of_birth(minimum_age=24, maximum_age=35), self.data_factory.date_of_birth(minimum_age=0, maximum_age=24), self.data_factory.sentence()),
-            (testing_utils.give_unique_word(Identificacion), int(self.data_factory.credit_card_number()), self.data_factory.name(), "palabra", self.data_factory.date_of_birth(minimum_age=24, maximum_age=35), self.data_factory.date_of_birth(minimum_age=0, maximum_age=24), self.data_factory.sentence()),
-            (testing_utils.give_unique_word(Identificacion), int(self.data_factory.credit_card_number()), self.data_factory.name(), self.data_factory.date_of_birth(minimum_age=35, maximum_age=99), "palabra", self.data_factory.date_of_birth(minimum_age=0, maximum_age=24), self.data_factory.sentence()),
-            (testing_utils.give_unique_word(Identificacion), int(self.data_factory.credit_card_number()), self.data_factory.name(), self.data_factory.date_of_birth(minimum_age=35, maximum_age=99), self.data_factory.date_of_birth(minimum_age=24, maximum_age=35), "palabra", self.data_factory.sentence()),
-            (testing_utils.give_unique_word(Identificacion), int(self.data_factory.credit_card_number()), self.data_factory.name(), self.data_factory.date_of_birth(minimum_age=35, maximum_age=99), self.data_factory.date_of_birth(minimum_age=24, maximum_age=35), self.data_factory.date_of_birth(minimum_age=0, maximum_age=24), 1)
+            (testing_utils.give_unique_word(Identificacion), "?", self.data_factory.name(), self.data_factory.date_of_birth(minimum_age=35, maximum_age=99).strftime('%Y-%m-%d'), self.data_factory.date_of_birth(minimum_age=24, maximum_age=35).strftime('%Y-%m-%d'), self.data_factory.date_of_birth(minimum_age=0, maximum_age=24).strftime('%Y-%m-%d'), self.data_factory.sentence()),
+            (testing_utils.give_unique_word(Identificacion), self.data_factory.credit_card_number(), self.data_factory.name(), "palabra", self.data_factory.date_of_birth(minimum_age=24, maximum_age=35).strftime('%Y-%m-%d'), self.data_factory.date_of_birth(minimum_age=0, maximum_age=24).strftime('%Y-%m-%d'), self.data_factory.sentence()),
+            (testing_utils.give_unique_word(Identificacion), self.data_factory.credit_card_number(), self.data_factory.name(), self.data_factory.date_of_birth(minimum_age=35, maximum_age=99).strftime('%Y-%m-%d'), "palabra", self.data_factory.date_of_birth(minimum_age=0, maximum_age=24).strftime('%Y-%m-%d'), self.data_factory.sentence()),
+            (testing_utils.give_unique_word(Identificacion), self.data_factory.credit_card_number(), self.data_factory.name(), self.data_factory.date_of_birth(minimum_age=35, maximum_age=99).strftime('%Y-%m-%d'), self.data_factory.date_of_birth(minimum_age=24, maximum_age=35).strftime('%Y-%m-%d'), "palabra", self.data_factory.sentence()),
         ]
         for params in test_cases:
-            self.assertRaises(TypeError, self.fachada.crear_id, *params)
+            self.assertRaises(ValueError, self.fachada.crear_id, *params)
     
     def test_crear_identificacion_con_campos_de_texto_muy_cortos(self):
-        unchangable_data = (self.data_factory.date_of_birth(minimum_age=35, maximum_age=99), self.data_factory.date_of_birth(minimum_age=24, maximum_age=35), self.data_factory.date_of_birth(minimum_age=0, maximum_age=24))
-        number = int(self.data_factory.credit_card_number())
+        unchangable_data = (self.data_factory.date_of_birth(minimum_age=35, maximum_age=99).strftime('%Y-%m-%d'), self.data_factory.date_of_birth(minimum_age=24, maximum_age=35).strftime('%Y-%m-%d'), self.data_factory.date_of_birth(minimum_age=0, maximum_age=24).strftime('%Y-%m-%d'))
+        number = self.data_factory.credit_card_number()
         test_cases = [
             ("aa", number, self.data_factory.name()) + unchangable_data + (self.data_factory.sentence(),),
             (testing_utils.give_unique_word(Identificacion), number, "aa") + unchangable_data + (self.data_factory.sentence(),),
@@ -54,8 +51,8 @@ class IdentificacionTestCase(unittest.TestCase):
             self.assertRaises(ValueError, self.fachada.crear_id, *params)
 
     def test_crear_identificacion_con_campos_de_texto_muy_largos(self):
-        unchangable_data = (self.data_factory.date_of_birth(minimum_age=35, maximum_age=99), self.data_factory.date_of_birth(minimum_age=24, maximum_age=35), self.data_factory.date_of_birth(minimum_age=0, maximum_age=24))
-        number = int(self.data_factory.credit_card_number())
+        unchangable_data = (self.data_factory.date_of_birth(minimum_age=35, maximum_age=99).strftime('%Y-%m-%d'), self.data_factory.date_of_birth(minimum_age=24, maximum_age=35).strftime('%Y-%m-%d'), self.data_factory.date_of_birth(minimum_age=0, maximum_age=24).strftime('%Y-%m-%d'))
+        number = self.data_factory.credit_card_number()
         word_256 = testing_utils.generate_word_of_length(256)
         test_cases = [
             (word_256, number, self.data_factory.name()) + unchangable_data + (self.data_factory.sentence(),),
@@ -67,16 +64,16 @@ class IdentificacionTestCase(unittest.TestCase):
     
     def test_crear_identificacion_con_nombre_repetido(self):
         identificacion = self.identificacionesList[0]
-        self.assertRaises(ValueError, self.fachada.crear_id, identificacion.nombre, int(self.data_factory.credit_card_number()), self.data_factory.name(), self.data_factory.date_of_birth(minimum_age=35, maximum_age=99), self.data_factory.date_of_birth(minimum_age=24, maximum_age=35), self.data_factory.date_of_birth(minimum_age=0, maximum_age=24), self.data_factory.sentence())
+        self.assertRaises(ValueError, self.fachada.crear_id, identificacion.nombre, self.data_factory.credit_card_number(), self.data_factory.name(), self.data_factory.date_of_birth(minimum_age=35, maximum_age=99).strftime('%Y-%m-%d'), self.data_factory.date_of_birth(minimum_age=24, maximum_age=35).strftime('%Y-%m-%d'), self.data_factory.date_of_birth(minimum_age=0, maximum_age=24).strftime('%Y-%m-%d'), self.data_factory.sentence())
 
     def test_crear_identificacion(self):
         nombre = testing_utils.give_unique_word_of_length(Identificacion, 9)
         self.fachada.crear_id(nombre,
-                            int(self.data_factory.credit_card_number()),
+                            self.data_factory.credit_card_number(),
                             testing_utils.generate_word_of_length(25),
-                            self.data_factory.date_of_birth(minimum_age=35, maximum_age=99),
-                            self.data_factory.date_of_birth(minimum_age=24, maximum_age=35),
-                            self.data_factory.date_of_birth(minimum_age=0, maximum_age=24),
+                            self.data_factory.date_of_birth(minimum_age=35, maximum_age=99).strftime('%Y-%m-%d'),
+                            self.data_factory.date_of_birth(minimum_age=24, maximum_age=35).strftime('%Y-%m-%d'),
+                            self.data_factory.date_of_birth(minimum_age=0, maximum_age=24).strftime('%Y-%m-%d'),
                             testing_utils.generate_word_of_length(30))
         identificacion = session.query(Identificacion).filter(Identificacion.nombre == nombre).first()
         self.assertIsNotNone(identificacion)
@@ -85,41 +82,41 @@ class IdentificacionTestCase(unittest.TestCase):
     def test_editar_identificacion_inexistente(self):
         self.assertRaises(ValueError, self.fachada.editar_id, 0, 
                             testing_utils.give_unique_word(Identificacion),
-                            int(self.data_factory.credit_card_number()),
+                            self.data_factory.credit_card_number(),
                             self.data_factory.name(),
-                            self.data_factory.date_of_birth(minimum_age=35, maximum_age=99),
-                            self.data_factory.date_of_birth(minimum_age=24, maximum_age=35),
-                            self.data_factory.date_of_birth(minimum_age=0, maximum_age=24),
+                            self.data_factory.date_of_birth(minimum_age=35, maximum_age=99).strftime('%Y-%m-%d'),
+                            self.data_factory.date_of_birth(minimum_age=24, maximum_age=35).strftime('%Y-%m-%d'),
+                            self.data_factory.date_of_birth(minimum_age=0, maximum_age=24).strftime('%Y-%m-%d'),
                             self.data_factory.sentence())
 
     def test_editar_identificacion_con_nombre_repetido(self):
         identificacion = self.identificacionesList[0]
         self.assertRaises(ValueError, self.fachada.editar_id, identificacion.id, 
                             self.identificacionesList[1].nombre,
-                            int(self.data_factory.credit_card_number()),
+                            self.data_factory.credit_card_number(),
                             self.data_factory.name(),
-                            self.data_factory.date_of_birth(minimum_age=35, maximum_age=99),
-                            self.data_factory.date_of_birth(minimum_age=24, maximum_age=35),
-                            self.data_factory.date_of_birth(minimum_age=0, maximum_age=24),
+                            self.data_factory.date_of_birth(minimum_age=35, maximum_age=99).strftime('%Y-%m-%d'),
+                            self.data_factory.date_of_birth(minimum_age=24, maximum_age=35).strftime('%Y-%m-%d'),
+                            self.data_factory.date_of_birth(minimum_age=0, maximum_age=24).strftime('%Y-%m-%d'),
                             self.data_factory.sentence())
     
     def test_editar_identificacion_con_parametros_incorrectos(self):
         test_cases = [
-            ("hola", testing_utils.give_unique_word(Identificacion), int(self.data_factory.credit_card_number()), self.data_factory.name(), self.data_factory.date_of_birth(minimum_age=35, maximum_age=99), self.data_factory.date_of_birth(minimum_age=24, maximum_age=35), self.data_factory.date_of_birth(minimum_age=0, maximum_age=24), self.data_factory.sentence()),
-            (1, 1, int(self.data_factory.credit_card_number()), self.data_factory.name(), self.data_factory.date_of_birth(minimum_age=35, maximum_age=99), self.data_factory.date_of_birth(minimum_age=24, maximum_age=35), self.data_factory.date_of_birth(minimum_age=0, maximum_age=24), self.data_factory.sentence()),
-            (1,testing_utils.give_unique_word(Identificacion), "?", self.data_factory.name(), self.data_factory.date_of_birth(minimum_age=35, maximum_age=99), self.data_factory.date_of_birth(minimum_age=24, maximum_age=35), self.data_factory.date_of_birth(minimum_age=0, maximum_age=24), self.data_factory.sentence()),
-            (1,testing_utils.give_unique_word(Identificacion), int(self.data_factory.credit_card_number()), 1, self.data_factory.date_of_birth(minimum_age=35, maximum_age=99), self.data_factory.date_of_birth(minimum_age=24, maximum_age=35), self.data_factory.date_of_birth(minimum_age=0, maximum_age=24), self.data_factory.sentence()),
-            (1,testing_utils.give_unique_word(Identificacion), int(self.data_factory.credit_card_number()), self.data_factory.name(), "palabra", self.data_factory.date_of_birth(minimum_age=24, maximum_age=35), self.data_factory.date_of_birth(minimum_age=0, maximum_age=24), self.data_factory.sentence()),
-            (1,testing_utils.give_unique_word(Identificacion), int(self.data_factory.credit_card_number()), self.data_factory.name(), self.data_factory.date_of_birth(minimum_age=35, maximum_age=99), "palabra", self.data_factory.date_of_birth(minimum_age=0, maximum_age=24), self.data_factory.sentence()),
-            (1,testing_utils.give_unique_word(Identificacion), int(self.data_factory.credit_card_number()), self.data_factory.name(), self.data_factory.date_of_birth(minimum_age=35, maximum_age=99), self.data_factory.date_of_birth(minimum_age=24, maximum_age=35), "palabra", self.data_factory.sentence()),
-            (1,testing_utils.give_unique_word(Identificacion), int(self.data_factory.credit_card_number()), self.data_factory.name(), self.data_factory.date_of_birth(minimum_age=35, maximum_age=99), self.data_factory.date_of_birth(minimum_age=24, maximum_age=35), self.data_factory.date_of_birth(minimum_age=0, maximum_age=24), 1)
+            ("hola", testing_utils.give_unique_word(Identificacion), self.data_factory.credit_card_number(), self.data_factory.name(), self.data_factory.date_of_birth(minimum_age=35, maximum_age=99).strftime('%Y-%m-%d'), self.data_factory.date_of_birth(minimum_age=24, maximum_age=35).strftime('%Y-%m-%d'), self.data_factory.date_of_birth(minimum_age=0, maximum_age=24).strftime('%Y-%m-%d'), self.data_factory.sentence()),
+            (1, 1, self.data_factory.credit_card_number(), self.data_factory.name(), self.data_factory.date_of_birth(minimum_age=35, maximum_age=99).strftime('%Y-%m-%d'), self.data_factory.date_of_birth(minimum_age=24, maximum_age=35).strftime('%Y-%m-%d'), self.data_factory.date_of_birth(minimum_age=0, maximum_age=24).strftime('%Y-%m-%d'), self.data_factory.sentence()),
+            (1,testing_utils.give_unique_word(Identificacion), "?", self.data_factory.name(), self.data_factory.date_of_birth(minimum_age=35, maximum_age=99).strftime('%Y-%m-%d'), self.data_factory.date_of_birth(minimum_age=24, maximum_age=35).strftime('%Y-%m-%d'), self.data_factory.date_of_birth(minimum_age=0, maximum_age=24).strftime('%Y-%m-%d'), self.data_factory.sentence()),
+            (1,testing_utils.give_unique_word(Identificacion), self.data_factory.credit_card_number(), 1, self.data_factory.date_of_birth(minimum_age=35, maximum_age=99).strftime('%Y-%m-%d'), self.data_factory.date_of_birth(minimum_age=24, maximum_age=35).strftime('%Y-%m-%d'), self.data_factory.date_of_birth(minimum_age=0, maximum_age=24).strftime('%Y-%m-%d'), self.data_factory.sentence()),
+            (1,testing_utils.give_unique_word(Identificacion), self.data_factory.credit_card_number(), self.data_factory.name(), "palabra", self.data_factory.date_of_birth(minimum_age=24, maximum_age=35).strftime('%Y-%m-%d'), self.data_factory.date_of_birth(minimum_age=0, maximum_age=24).strftime('%Y-%m-%d'), self.data_factory.sentence()),
+            (1,testing_utils.give_unique_word(Identificacion), self.data_factory.credit_card_number(), self.data_factory.name(), self.data_factory.date_of_birth(minimum_age=35, maximum_age=99).strftime('%Y-%m-%d'), "palabra", self.data_factory.date_of_birth(minimum_age=0, maximum_age=24).strftime('%Y-%m-%d'), self.data_factory.sentence()),
+            (1,testing_utils.give_unique_word(Identificacion), self.data_factory.credit_card_number(), self.data_factory.name(), self.data_factory.date_of_birth(minimum_age=35, maximum_age=99).strftime('%Y-%m-%d'), self.data_factory.date_of_birth(minimum_age=24, maximum_age=35).strftime('%Y-%m-%d'), "palabra", self.data_factory.sentence()),
+            (1,testing_utils.give_unique_word(Identificacion), self.data_factory.credit_card_number(), self.data_factory.name(), self.data_factory.date_of_birth(minimum_age=35, maximum_age=99).strftime('%Y-%m-%d'), self.data_factory.date_of_birth(minimum_age=24, maximum_age=35).strftime('%Y-%m-%d'), self.data_factory.date_of_birth(minimum_age=0, maximum_age=24).strftime('%Y-%m-%d'), 1)
         ]
         for params in test_cases:
-            self.assertRaises(TypeError, self.fachada.editar_id, *params)
+            self.assertRaises(ValueError, self.fachada.editar_id, *params)
 
     def test_editar_identificacion_con_campos_de_texto_muy_cortos(self):
-        unchangable_data = (self.data_factory.date_of_birth(minimum_age=35, maximum_age=99), self.data_factory.date_of_birth(minimum_age=24, maximum_age=35), self.data_factory.date_of_birth(minimum_age=0, maximum_age=24))
-        number = int(self.data_factory.credit_card_number())
+        unchangable_data = (self.data_factory.date_of_birth(minimum_age=35, maximum_age=99).strftime('%Y-%m-%d'), self.data_factory.date_of_birth(minimum_age=24, maximum_age=35).strftime('%Y-%m-%d'), self.data_factory.date_of_birth(minimum_age=0, maximum_age=24).strftime('%Y-%m-%d'))
+        number = self.data_factory.credit_card_number()
         test_cases = [
             (self.identificacionesList[0].id,"aa", number, self.data_factory.name()) + unchangable_data + (self.data_factory.sentence(),),
             (self.identificacionesList[0].id,testing_utils.give_unique_word(Identificacion), number, "aa") + unchangable_data + (self.data_factory.sentence(),),
@@ -130,8 +127,8 @@ class IdentificacionTestCase(unittest.TestCase):
             self.assertRaises(ValueError, self.fachada.editar_id, *params)
 
     def test_editar_identificacion_con_campos_de_texto_muy_largos(self):
-        unchangable_data = (self.data_factory.date_of_birth(minimum_age=35, maximum_age=99), self.data_factory.date_of_birth(minimum_age=24, maximum_age=35), self.data_factory.date_of_birth(minimum_age=0, maximum_age=24))
-        number = int(self.data_factory.credit_card_number())
+        unchangable_data = (self.data_factory.date_of_birth(minimum_age=35, maximum_age=99).strftime('%Y-%m-%d'), self.data_factory.date_of_birth(minimum_age=24, maximum_age=35).strftime('%Y-%m-%d'), self.data_factory.date_of_birth(minimum_age=0, maximum_age=24).strftime('%Y-%m-%d'))
+        number = self.data_factory.credit_card_number()
         word_256 = testing_utils.generate_word_of_length(256)
         test_cases = [
             (self.identificacionesList[0].id, word_256, number, self.data_factory.name()) + unchangable_data + (self.data_factory.sentence(),),
@@ -150,11 +147,11 @@ class IdentificacionTestCase(unittest.TestCase):
         fvencimiento = self.data_factory.date_of_birth(minimum_age=0, maximum_age=24)
         self.fachada.editar_id(self.identificacionesList[0].id,
                             nombre,
-                            numero,
+                            str(numero),
                             nombre_completo,
-                            fnacimiento,
-                            fexpedicion,
-                            fvencimiento,
+                            fnacimiento.strftime('%Y-%m-%d'),
+                            fexpedicion.strftime('%Y-%m-%d'),
+                            fvencimiento.strftime('%Y-%m-%d'),
                             testing_utils.generate_word_of_length(30))
         identificacion = session.query(Identificacion).filter(Identificacion.nombre == nombre).first()
         self.assertIsNotNone(identificacion)
@@ -172,11 +169,11 @@ class IdentificacionTestCase(unittest.TestCase):
         fvencimiento = self.data_factory.date_of_birth(minimum_age=0, maximum_age=24)
         self.fachada.editar_id(self.identificacionesList[0].id,
                             self.identificacionesList[0].nombre,
-                            numero,
+                            str(numero),
                             nombre_completo,
-                            fnacimiento,
-                            fexpedicion,
-                            fvencimiento,
+                            fnacimiento.strftime('%Y-%m-%d'),
+                            fexpedicion.strftime('%Y-%m-%d'),
+                            fvencimiento.strftime('%Y-%m-%d'),
                             testing_utils.generate_word_of_length(30))
         identificacion = session.query(Identificacion).filter(Identificacion.nombre == self.identificacionesList[0].nombre).first()
         self.assertIsNotNone(identificacion)

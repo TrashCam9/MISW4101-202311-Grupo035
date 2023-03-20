@@ -141,7 +141,7 @@ class VistaListaClaves(QWidget):
         dialogo=VistaCrearClave(self.claves[id_clave], self.interfaz)
         dialogo.exec_()
         if dialogo.resultado==1:            
-            self.interfaz.editar_clave(id_clave, dialogo.texto_nombre.text(), dialogo.texto_clave.text(),dialogo.texto_pista.text())
+            self.interfaz.editar_clave(id_clave+1, dialogo.texto_nombre.text(), dialogo.texto_clave.text(),dialogo.texto_pista.text())
 
     def eliminar_clave(self, indice_clave):
         """
@@ -155,7 +155,7 @@ class VistaListaClaves(QWidget):
         mensaje_confirmacion.setStandardButtons(QMessageBox.Yes | QMessageBox.No ) 
         respuesta=mensaje_confirmacion.exec_()
         if respuesta == QMessageBox.Yes:
-            self.interfaz.eliminar_clave(indice_clave)
+            self.interfaz.eliminar_clave(indice_clave+1)
             self.hide()
             self.interfaz.mostrar_claves_favoritas()
 

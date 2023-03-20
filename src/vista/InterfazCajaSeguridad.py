@@ -67,13 +67,13 @@ class App_CajaDeSeguridad(QApplication):
 
         if id_elemento != -1:
             tipo = self.logica.dar_elementos()[id_elemento]['tipo']
-            if tipo == "Login":
+            if tipo == "login":
                 self.mostrar_login(id_elemento)
-            elif tipo == "Identificación":
+            elif tipo == "identificación":
                 self.mostrar_id(id_elemento)
-            elif tipo == "Tarjeta":
+            elif tipo == "tarjeta":
                 self.mostrar_tarjeta(id_elemento)
-            elif tipo == "Secreto":
+            elif tipo == "secreto":
                 self.mostrar_secreto(id_elemento)
             else:
                 print("Error tipo")
@@ -85,7 +85,7 @@ class App_CajaDeSeguridad(QApplication):
         self.elemento_actual = id_elemento
         if id_elemento != -1:
                 self.vista_login = VistaLogin(self, self.logica.dar_claves_favoritas())
-                self.vista_login.mostrar_login(self.logica.dar_elemento(self.elemento_actual))
+                self.vista_login.mostrar_login(self.logica.dar_elemento(self.elemento_actual + 1))
         else:
             self.vista_login = VistaLogin(self,self.logica.dar_claves_favoritas())
             self.vista_login.mostrar_login(None)
@@ -100,7 +100,7 @@ class App_CajaDeSeguridad(QApplication):
             if self.elemento_actual == -1:
                 self.logica.crear_login(nombre, email, usuario, password, url, notas)
             else:
-                self.logica.editar_login(self.elemento_actual, nombre, email, usuario, password, url, notas)
+                self.logica.editar_login(self.elemento_actual + 1, nombre, email, usuario, password, url, notas)
             self.vista_lista_elementos.mostrar_elementos(self.logica.dar_elementos())
         return validacion
 
@@ -111,7 +111,7 @@ class App_CajaDeSeguridad(QApplication):
         self.elemento_actual = id_elemento
         if id_elemento != -1:
             self.vista_id = VistaId(self)
-            self.vista_id.mostrar_id(self.logica.dar_elemento(self.elemento_actual))
+            self.vista_id.mostrar_id(self.logica.dar_elemento(self.elemento_actual + 1))
         else:
             self.vista_id = VistaId(self)
             self.vista_id.mostrar_id(None)
@@ -125,7 +125,7 @@ class App_CajaDeSeguridad(QApplication):
             if self.elemento_actual == -1:
                 self.logica.crear_id(nombre_elemento, numero, nombre_completo, fnacimiento, fexpedicion, fvencimiento, notas)
             else:
-                self.logica.editar_id(self.elemento_actual, nombre_elemento, numero, nombre_completo, fnacimiento, fexpedicion, fvencimiento, notas)
+                self.logica.editar_id(self.elemento_actual + 1, nombre_elemento, numero, nombre_completo, fnacimiento, fexpedicion, fvencimiento, notas)
             self.vista_lista_elementos.mostrar_elementos(self.logica.dar_elementos())
         return validacion
 
@@ -136,7 +136,7 @@ class App_CajaDeSeguridad(QApplication):
         self.elemento_actual = id_elemento
         if id_elemento != -1:
             self.vista_tarjeta = VistaTarjeta(self, self.logica.dar_claves_favoritas())
-            self.vista_tarjeta.mostrar_tarjeta(self.logica.dar_elemento(self.elemento_actual))
+            self.vista_tarjeta.mostrar_tarjeta(self.logica.dar_elemento(self.elemento_actual + 1))
         else:
             self.vista_tarjeta = VistaTarjeta(self,self.logica.dar_claves_favoritas())
             self.vista_tarjeta.mostrar_tarjeta(None)
@@ -150,7 +150,7 @@ class App_CajaDeSeguridad(QApplication):
             if self.elemento_actual == -1:
                 self.logica.crear_tarjeta(nombre_elemento, numero, titular ,fvencimiento, ccv, clave, direccion, telefono, notas)
             else:
-                self.logica.editar_tarjeta(self.elemento_actual, nombre_elemento, numero, titular, fvencimiento, ccv, clave, direccion, telefono, notas)
+                self.logica.editar_tarjeta(self.elemento_actual + 1, nombre_elemento, numero, titular, fvencimiento, ccv, clave, direccion, telefono, notas)
             self.vista_lista_elementos.mostrar_elementos(self.logica.dar_elementos())
         return validacion
 
@@ -161,7 +161,7 @@ class App_CajaDeSeguridad(QApplication):
         self.elemento_actual = id_elemento
         if id_elemento != -1:
                 self.vista_secreto = VistaSecreto(self, self.logica.dar_claves_favoritas())
-                self.vista_secreto.mostrar_secreto(self.logica.dar_elemento(self.elemento_actual))
+                self.vista_secreto.mostrar_secreto(self.logica.dar_elemento(self.elemento_actual + 1))
         else:
             self.vista_secreto = VistaSecreto(self, self.logica.dar_claves_favoritas())
             self.vista_secreto.mostrar_secreto(None)
@@ -175,7 +175,7 @@ class App_CajaDeSeguridad(QApplication):
             if self.elemento_actual == -1:
                 self.logica.crear_secreto(nombre, secreto, clave, notas)
             else:
-                self.logica.editar_secreto(self.elemento_actual, nombre, secreto, clave, notas)
+                self.logica.editar_secreto(self.elemento_actual + 1, nombre, secreto, clave, notas)
             self.vista_lista_elementos.mostrar_elementos(self.logica.dar_elementos())
         return validacion
 
@@ -191,7 +191,7 @@ class App_CajaDeSeguridad(QApplication):
         Esta función muestra la clave del elemento
         """
         self.elemento_actual = id_elemento
-        clave_elemento = self.logica.dar_elemento(id_elemento)['clave']
+        clave_elemento = self.logica.dar_elemento(id_elemento + 1)['clave']
         clave = self.logica.dar_clave(clave_elemento)
         QMessageBox.information(ventana, 'Clave elemento',
                                 "Nombre clave favorita: " + clave_elemento + "\nClave: " + clave, QMessageBox.Ok)

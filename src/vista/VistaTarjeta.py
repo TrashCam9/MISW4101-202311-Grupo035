@@ -145,7 +145,7 @@ class VistaTarjeta(QWidget):
     def mostrar_tarjeta(self, elemento):
         self.elemento=elemento
         if (self.elemento!=None):
-            self.texto_nombre_elemento.setText(self.elemento["nombre_elemento"])
+            self.texto_nombre_elemento.setText(self.elemento["nombre"])
             self.texto_numero.setText(self.elemento["numero"])
             self.texto_titular.setText(self.elemento["titular"])
             self.fvencimiento.setDate(QtCore.QDate.fromString(str(self.elemento["fecha_venc"]), "yyyy-MM-dd"))
@@ -154,7 +154,7 @@ class VistaTarjeta(QWidget):
             self.combobox_claves.setCurrentIndex(indice_clave)
             self.texto_direccion.setText(self.elemento["direccion"])
             self.texto_telefono.setText(self.elemento["telefono"])
-            self.texto_notas.setText(str(self.elemento["notas"]))
+            self.texto_notas.setText(str(self.elemento["nota"]))
 
     def volver(self):
         """

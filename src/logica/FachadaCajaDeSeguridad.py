@@ -1,7 +1,7 @@
 '''
 Esta clase es la fachada con los métodos a implementar en la lógica
 '''
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from src.modelo.elemento import Elemento, ElementoConClave, Identificacion, Login, Secreto, Tarjeta
 from src.modelo.clave import Clave
 from src.modelo.caja_de_seguridad import CajaDeSeguridad
@@ -38,7 +38,20 @@ class FachadaCajaDeSeguridad:
         Retorna:
             (dict): El elemento identificado con id_elemento
         '''
-        raise NotImplementedError("Método no implementado")
+        elemento = session.query(Elemento).filter_by(id=id_elemento).first()
+        if elemento is None:
+            raise ValueError("No existe un elemento con el id: " + str(id_elemento))
+
+        if elemento.tipo == "login":
+            elemento = session.query(Login).filter_by(id=id_elemento).first()
+        elif elemento.tipo == "identificacion":
+            elemento = session.query(Identificacion).filter_by(id=id_elemento).first()
+        elif elemento.tipo == "tarjeta":
+            elemento = session.query(Tarjeta).filter_by(id=id_elemento).first()
+        elif elemento.tipo == "secreto":
+            elemento = session.query(Secreto).filter_by(id=id_elemento).first()
+        return elemento
+        
 
     def dar_claves_favoritas(self):
         ''' Retorna la lita de claves favoritas
@@ -55,7 +68,7 @@ class FachadaCajaDeSeguridad:
         Retorna:
             (dict): La clave favorita identificada con id_clave
         '''
-        raise NotImplementedError("Método no implementado")
+        return session.query(Clave).filter_by(id=id_clave).first()
 
     def dar_clave(self, nombre_clave):
         ''' Retorna la clave asignada a una clave favorita
@@ -64,7 +77,10 @@ class FachadaCajaDeSeguridad:
         Retorna:
             (string): La clave asignada a la clave favorita del parámetro
         '''
-        raise NotImplementedError("Método no implementado")
+        clave_favorita = session.query(Clave).filter_by(nombre=nombre_clave).first()
+        if clave_favorita is None:
+            raise ValueError("No existe una clave favorita con el nombre: " + nombre_clave)
+        return clave_favorita.clave
 
     def eliminar_elemento(self, id):
         ''' Elimina un elemento de la lista de elementos
@@ -94,10 +110,9 @@ class FachadaCajaDeSeguridad:
             url (string): El URL del login
             notas (string): Las notas del elemento
         '''
-        self.validar_crear_editar_login(None, nombre, email, usuario, password, url, notas)
-        
-        if session.query(Clave).filter_by(nombre=password).first() is None:
-            raise ValueError("El nombre de clave favorita no existe")
+        validacion = self.validar_crear_editar_login(None, nombre, email, usuario, password, url, notas)
+        if validacion:
+            raise ValueError(validacion)
 
         session.add(Login(tipo="login", nombre=nombre, nota=notas, email=email, usuario=usuario, clave=password, url=url))
         session.commit()
@@ -131,8 +146,22 @@ class FachadaCajaDeSeguridad:
         password_correcto = self.validar_parametro_string(password)
         url_correcto = self.validar_parametro_string(url)
         notas_correcto = self.validar_parametro_string(notas)
-        if not (nombre_correcto and email_correcto and usuario_correcto and password_correcto and url_correcto and notas_correcto) or type(id) == str:
-                raise TypeError("Los parámetros no son del tipo correcto")
+        if not (nombre_correcto and email_correcto and usuario_correcto and password_correcto and url_correcto and notas_correcto):
+                return "Los parámetros no son del tipo correcto"
+        
+        if session.query(Login).filter_by(nombre=nombre).first() is not None:
+            return "El nombre del login ya existe"
+
+        if session.query(Clave).filter_by(nombre=password).first() is None:
+            return "La clave favorita no existe"
+
+        if '@' not in email or '.' not in email:
+            return "El email no es válido"
+        
+        if not ('http' in url or 'www' in url):
+            return "El URL no es válido"
+        
+        return ""
 
     def editar_login(self, id, nombre, email, usuario, password, url, notas):
         ''' Edita un elemento login
@@ -145,17 +174,15 @@ class FachadaCajaDeSeguridad:
             url (string): El URL del login
             notas (string): Las notas del elemento
         '''
-        self.validar_crear_editar_login(id, nombre, email, usuario, password, url, notas)
+        validacion = self.validar_crear_editar_login(id, nombre, email, usuario, password, url, notas)
+        if validacion != "":
+            raise ValueError(validacion)
 
         # Verificar que el id exista
         login = session.query(Login).filter_by(id=id).first()
         if login is None:
-            raise ValueError("El id no existe")
+            raise ValueError("El login especificado no existe")
         
-        # Verificar que la clave favorita exista
-        if session.query(Clave).filter_by(nombre=password).first() is None:
-            raise ValueError("El nombre de clave favorita no existe")
-
         # Editar el login
         login.nombre = nombre
         login.email = email
@@ -176,15 +203,17 @@ class FachadaCajaDeSeguridad:
             fvencimiento (string): La feha de vencimiento en la identificación
             notas (string): Las notas del elemento
         '''
-        self.validar_crear_editar_id(None, nombre_elemento, numero, nombre_completo, fnacimiento, fexpedicion, fvencimiento, notas)
-        identificacion = Identificacion(tipo = "Identificacion",
+        validacion = self.validar_crear_editar_id(-1, nombre_elemento, numero, nombre_completo, fnacimiento, fexpedicion, fvencimiento, notas)
+        if validacion:
+            raise ValueError(validacion)
+        identificacion = Identificacion(tipo = "identificacion",
                                         nombre = nombre_elemento,
                                         nota = notas,
-                                        numero = numero,
+                                        numero = int(numero),
                                         nombreCompleto = nombre_completo,
-                                        fechaNacimiento = fnacimiento,
-                                        fechaExpedicion = fexpedicion,
-                                        fechaVencimiento = fvencimiento)
+                                        fechaNacimiento = datetime.strptime(fnacimiento,"%Y-%m-%d"),
+                                        fechaExpedicion = datetime.strptime(fexpedicion, "%Y-%m-%d"),
+                                        fechaVencimiento = datetime.strptime(fvencimiento, "%Y-%m-%d"))
         session.add(identificacion)
         session.commit()
 
@@ -202,21 +231,30 @@ class FachadaCajaDeSeguridad:
             (string): El mensaje de error generado al presentarse errores en la 
             validación o una cadena de caracteres vacía si no hay errores.
         '''
-        if not isinstance(nombre_elemento, str) or not isinstance(numero, int) or not isinstance(nombre_completo, str) or not isinstance(fnacimiento, date) or not isinstance(fexpedicion, date) or not isinstance(fvencimiento, date) or not isinstance (notas, str) or (id != None and not type(id) == int):
-            raise TypeError("Los parámetros no son del tipo correcto")
+        try:
+            numero = int(numero)
+            fnacimiento = datetime.strptime(fnacimiento, "%Y-%m-%d")
+            fexpedicion = datetime.strptime(fexpedicion, "%Y-%m-%d")
+            fvencimiento = datetime.strptime(fvencimiento, "%Y-%m-%d")
+        except:
+            return "Los campos llenados no tienen la información solicitada"
+        if not (self.validar_parametro_string(nombre_elemento) and self.validar_parametro_string(nombre_completo) and self.validar_parametro_string(notas)):
+            return "Los campos llenados no tienen la información solicitada"
         if len(nombre_elemento) < 3 or len(nombre_completo) < 3 or len(notas) < 3:
-            raise ValueError("Los parámetros no cumplen con la longitud mínima")
+            return "Los campos deben tener al menos 3 caracteres"
         if len(nombre_elemento) > 255 or len(nombre_completo) > 255 or len(notas) > 512:
-            raise ValueError("Los parámetros no cumplen con la longitud máxima")
-        if (identificacion:=session.query(Identificacion).filter_by(nombre=nombre_elemento).first()) is not None:
-            if id == None:
-                raise ValueError("El nombre de la identificación ya existe")
+            return "El número máximo de caracteres es 255 para el nombre, 255 para el nombre completo y 512 para las notas"
+        identificacion = session.query(Identificacion).filter_by(nombre=nombre_elemento).first()
+        if identificacion:
+            if id == -1:
+                return "El nombre de la identificación ya existe"
             else:
                 if identificacion.id != id:
-                    raise ValueError("El nombre de la identificación ya existe")
-        if id != None:
+                    return "El nombre de la identificación ya existe"
+        if id != -1:
             if session.query(Identificacion).filter_by(id=id).first() is None:
-                raise ValueError("La identificación no existe")
+                return "La identificación no existe"
+        return ""
 
     def editar_id(self, id,nombre_elemento, numero, nombre_completo, fnacimiento, fexpedicion, fvencimiento, notas):
         ''' Edita un elemento identificación
@@ -229,15 +267,17 @@ class FachadaCajaDeSeguridad:
             fvencimiento (string): La feha de vencimiento en la identificación
             notas (string): Las notas del elemento
         '''
-        self.validar_crear_editar_id(id, nombre_elemento, numero, nombre_completo, fnacimiento, fexpedicion, fvencimiento, notas)
+        validacion = self.validar_crear_editar_id(id, nombre_elemento, numero, nombre_completo, fnacimiento, fexpedicion, fvencimiento, notas)
+        if validacion:
+            raise ValueError(validacion)
         identificacion = session.query(Identificacion).filter_by(id=id).first()
         identificacion.nombre = nombre_elemento
         identificacion.nota = notas
-        identificacion.numero = numero
+        identificacion.numero = int(numero)
         identificacion.nombreCompleto = nombre_completo
-        identificacion.fechaNacimiento = fnacimiento
-        identificacion.fechaExpedicion = fexpedicion
-        identificacion.fechaVencimiento = fvencimiento
+        identificacion.fechaNacimiento = datetime.strptime(fnacimiento, "%Y-%m-%d")
+        identificacion.fechaExpedicion = datetime.strptime(fexpedicion, "%Y-%m-%d")
+        identificacion.fechaVencimiento = datetime.strptime(fvencimiento, "%Y-%m-%d")
         session.commit()
 
 
@@ -330,7 +370,8 @@ class FachadaCajaDeSeguridad:
             clave (string): El password o clave de la clave favorita
             pista (string): La pista para recordar la clave favorita
         '''
-        if error_message := self.validar_crear_editar_clave(nombre, clave, pista):
+        error_message = self.validar_crear_editar_clave(nombre, clave, pista)
+        if error_message:
             raise TypeError(error_message)
 
         clave = Clave(nombre=nombre, clave=clave, pista=pista)
@@ -370,6 +411,7 @@ class FachadaCajaDeSeguridad:
             raise ValueError("La clave favorita referenciada no existe.")
         else: 
             clave_busqueda = session.query(Clave).filter(Clave.id == id).first()
+            clave_busqueda.nombre = nombre
             clave_busqueda.clave = clave
             clave_busqueda.pista = pista
             session.commit()

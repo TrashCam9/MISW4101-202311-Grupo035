@@ -36,17 +36,6 @@ class LoginTestCase(unittest.TestCase):
             session.commit()
         session.close()
 
-    def test_crear_login(self):
-        nombre = testing_utils.give_unique_word(Login)
-        self.fachada.crear_login(nombre,
-                                 self.data_factory.email(),
-                                 self.data_factory.user_name(),
-                                 self.clave.nombre,
-                                 self.data_factory.url(),
-                                 self.data_factory.sentence())
-        self.assertIsNot(len(session.query(Login).filter(Login.nombre == nombre).all()), 0)
-        self.loginsList.append(session.query(Login).filter(Login.nombre == nombre).first())
-
     def test_crear_login_con_clave_inexistente(self):
         self.assertRaises(ValueError, self.fachada.crear_login, 
                           testing_utils.give_unique_word(Login), 
@@ -66,7 +55,45 @@ class LoginTestCase(unittest.TestCase):
             (testing_utils.give_unique_word(Login), self.data_factory.email(), self.data_factory.user_name(), self.clave.nombre, self.data_factory.url(), 1)
         ]
         for params in test_cases:
-            self.assertRaises(TypeError, self.fachada.crear_login, *params)
+            self.assertRaises(ValueError, self.fachada.crear_login, *params)
+
+    def test_crear_login_nombre_existente(self):
+        self.assertRaises(ValueError, self.fachada.crear_login, 
+                          self.loginsList[0].nombre, 
+                          self.data_factory.email(),
+                          self.data_factory.user_name(),
+                          self.clave.nombre,
+                          self.data_factory.url(),
+                          self.data_factory.sentence())
+        
+    def test_crear_login_email_errado(self):
+        self.assertRaises(ValueError, self.fachada.crear_login, 
+                          testing_utils.give_unique_word(Login), 
+                          "email",
+                          self.data_factory.user_name(),
+                          self.clave.nombre,
+                          self.data_factory.url(),
+                          self.data_factory.sentence())
+        
+    def test_crear_login_url_errada(self):
+        self.assertRaises(ValueError, self.fachada.crear_login, 
+                          testing_utils.give_unique_word(Login), 
+                          self.data_factory.email(),
+                          self.data_factory.user_name(),
+                          self.clave.nombre,
+                          "url",
+                          self.data_factory.sentence())
+
+    def test_crear_login(self):
+        nombre = testing_utils.give_unique_word(Login)
+        self.fachada.crear_login(nombre,
+                                 self.data_factory.email(),
+                                 self.data_factory.user_name(),
+                                 self.clave.nombre,
+                                 self.data_factory.url(),
+                                 self.data_factory.sentence())
+        self.assertIsNot(len(session.query(Login).filter(Login.nombre == nombre).all()), 0)
+        self.loginsList.append(session.query(Login).filter(Login.nombre == nombre).first())
 
     def test_editar_login_con_parametros_incorrectos(self):
         test_cases = [
@@ -79,7 +106,7 @@ class LoginTestCase(unittest.TestCase):
             (1, self.data_factory.domain_word(), self.data_factory.email(), self.data_factory.user_name(), self.clave.nombre, self.data_factory.url(), 1)
         ]
         for params in test_cases:
-            self.assertRaises(TypeError, self.fachada.editar_login, *params)
+            self.assertRaises(ValueError, self.fachada.editar_login, *params)
 
     def test_editar_login_inexistente(self):
         self.assertRaises(ValueError, self.fachada.editar_login,

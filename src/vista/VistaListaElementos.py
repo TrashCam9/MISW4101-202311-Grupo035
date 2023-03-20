@@ -138,7 +138,7 @@ class VistaListaElementos(QWidget):
             for dic_elemento in self.elementos:
                 numero_fila=numero_fila+1
 
-                etiqueta_nombre=QLabel(dic_elemento['nombre_elemento'])
+                etiqueta_nombre=QLabel(dic_elemento['nombre'])
                 etiqueta_nombre.setWordWrap(True)
                 self.distribuidor_tabla_elementos.addWidget(etiqueta_nombre,numero_fila,0)
 
@@ -148,12 +148,12 @@ class VistaListaElementos(QWidget):
 
                 #Creación de los botones asociados a cada acción
 
-                if dic_elemento['tipo'] !='Identificación':
+                if dic_elemento['tipo'] !='Identificacion':
                     btn_ver_clave=QPushButton("",self)
                     btn_ver_clave.setToolTip("Ver clave")
                     btn_ver_clave.setFixedSize(40,40)
                     btn_ver_clave.setIcon(QIcon("src/recursos/002-eye-variant-with-enlarged-pupil.png"))
-                    btn_ver_clave.clicked.connect(partial(self.mostrar_clave,numero_fila -1 ) )
+                    btn_ver_clave.clicked.connect(partial(self.mostrar_clave,numero_fila -1) )
                     self.distribuidor_tabla_elementos.addWidget(btn_ver_clave,numero_fila,2,Qt.AlignCenter)
 
                 btn_editar_elemento=QPushButton("",self)

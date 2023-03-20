@@ -110,11 +110,11 @@ class VistaSecreto(QWidget):
     def mostrar_secreto(self, elemento):
         self.elemento=elemento
         if (self.elemento!=None):
-            self.texto_nombre.setText(self.elemento["nombre_elemento"])
+            self.texto_nombre.setText(self.elemento["nombre"])
             self.texto_secreto.setText(self.elemento["secreto"])
             indice_clave = self.combobox_claves.findText(self.elemento["clave"])
             self.combobox_claves.setCurrentIndex(indice_clave)
-            self.texto_notas.setText(str(self.elemento["notas"]))
+            self.texto_notas.setText(str(self.elemento["nota"]))
 
     def volver(self):
         """
